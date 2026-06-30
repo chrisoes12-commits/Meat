@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moco Meats — Platform Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F0E0B;
+    --bg-card: #1A1814;
+    --bg-raised: #222018;
+    --gold: #C4973A;
+    --gold-dim: rgba(196,151,58,0.32);
+    --gold-pale: rgba(196,151,58,0.08);
+    --text-1: #F0EAE0;
+    --text-2: #A09078;
+    --text-3: #564A3C;
+    --border: rgba(196,151,58,0.10);
+    --border-hi: rgba(196,151,58,0.28);
+
+    --m1: #B2492F;   /* sales skills - rust/leather */
+    --m1-glow: rgba(178,73,47,0.18);
+    --m2: #8B6F3A;   /* product knowledge - amber/grain */
+    --m2-glow: rgba(139,111,58,0.18);
+    --m3: #3A6B5E;   /* territory - deep green */
+    --m3-glow: rgba(58,107,94,0.18);
+    --m4: #4A5A8B;   /* live practice - deep blue */
+    --m4-glow: rgba(74,90,139,0.18);
+    --hub: #C4973A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-1);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* leather texture backdrop */
+  .leather-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 120% 80% at 20% -10%, rgba(196,151,58,0.10) 0%, transparent 55%),
+      radial-gradient(ellipse 100% 70% at 90% 110%, rgba(178,73,47,0.08) 0%, transparent 55%),
+      var(--bg);
+    pointer-events: none;
+  }
+  .grain-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    opacity: 0.04;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 2;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 56px 28px 80px;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    text-align: center;
+    padding: 28px 0 52px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+    position: relative;
+  }
+  .hero-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: clamp(36px, 6vw, 64px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin-bottom: 14px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--gold);
+  }
+  .hero p.sub {
+    font-size: 16px;
+    color: var(--text-2);
+    max-width: 540px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* progress strip */
+  .progress-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 36px;
+    flex-wrap: wrap;
+  }
+  .progress-stat {
+    text-align: center;
+    padding: 14px 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    min-width: 110px;
+  }
+  .progress-stat .num {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .progress-stat .label {
+    font-size: 11px;
+    color: var(--text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 6px;
+  }
+
+  .progress-bar-outer {
+    max-width: 480px;
+    margin: 28px auto 0;
+  }
+  .progress-bar-track {
+    height: 6px;
+    background: var(--bg-card);
+    border-radius: 99px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .progress-bar-fill {
+    height: 100%;
+    width: 5.5%;
+    background: linear-gradient(90deg, var(--gold), #E0B968);
+    border-radius: 99px;
+  }
+  .progress-bar-caption {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-3);
+    margin-top: 10px;
+    letter-spacing: 0.02em;
+  }
+
+  /* ---------- JOURNEY LINE ---------- */
+  .journey {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 0 0 56px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-2);
+    flex-wrap: wrap;
+  }
+  .journey-node {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+  }
+  .journey-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text-3);
+  }
+  .journey-arrow {
+    color: var(--text-3);
+    opacity: 0.5;
+  }
+
+  /* ---------- MODULE SECTIONS ---------- */
+  .module {
+    margin-bottom: 44px;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+  }
+  .module-head {
+    padding: 26px 30px 22px;
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .module-head::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.55;
+  }
+  .module[data-mod="1"] .module-head { background: linear-gradient(135deg, var(--m1-glow), transparent 70%); }
+  .module[data-mod="2"] .module-head { background: linear-gradient(135deg, var(--m2-glow), transparent 70%); }
+  .module[data-mod="3"] .module-head { background: linear-gradient(135deg, var(--m3-glow), transparent 70%); }
+  .module[data-mod="4"] .module-head { background: linear-gradient(135deg, var(--m4-glow), transparent 70%); }
+
+  .module-title-block { display: flex; align-items: baseline; gap: 14px; }
+  .module-num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 15px;
+    opacity: 0.6;
+  }
+  .module[data-mod="1"] .module-num,
+  .module[data-mod="1"] .module-title { color: var(--m1); }
+  .module[data-mod="2"] .module-num,
+  .module[data-mod="2"] .module-title { color: var(--m2); }
+  .module[data-mod="3"] .module-num,
+  .module[data-mod="3"] .module-title { color: var(--m3); }
+  .module[data-mod="4"] .module-num,
+  .module[data-mod="4"] .module-title { color: var(--m4); }
+
+  .module-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 24px;
+  }
+  .module-tagline {
+    font-size: 13px;
+    color: var(--text-2);
+    font-style: italic;
+    margin-top: 2px;
+  }
+  .module-progress {
+    font-size: 12px;
+    color: var(--text-2);
+    text-align: right;
+    white-space: nowrap;
+  }
+  .module-progress strong { color: var(--text-1); font-weight: 600; }
+
+  .module-body {
+    padding: 4px 30px 26px;
+  }
+
+  .asset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .asset-card {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 16px 14px;
+    position: relative;
+    transition: border-color 0.2s ease;
+  }
+  .asset-card.done { border-color: var(--gold-dim); }
+  .asset-card.progress { border-color: rgba(160,144,120,0.3); }
+
+  .asset-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .asset-type {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    font-weight: 500;
+  }
+  .status-pill {
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    white-space: nowrap;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .status-pill.done { background: rgba(196,151,58,0.16); color: var(--gold); border: 1px solid var(--gold-dim); }
+  .status-pill.progress { background: rgba(160,144,120,0.12); color: var(--text-2); border: 1px solid rgba(160,144,120,0.25); }
+  .status-pill.todo { background: transparent; color: var(--text-3); border: 1px solid var(--border); }
+
+  .asset-name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 15.5px;
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  .asset-desc {
+    font-size: 12.5px;
+    color: var(--text-2);
+    line-height: 1.5;
+  }
+
+  /* ---------- HUB ---------- */
+  .hub-section {
+    margin: 56px 0 0;
+    text-align: center;
+    padding: 44px 28px;
+    border-radius: 20px;
+    background:
+      radial-gradient(ellipse 100% 100% at 50% 0%, rgba(196,151,58,0.10) 0%, transparent 65%),
+      var(--bg-card);
+    border: 1px solid var(--gold-dim);
+    position: relative;
+  }
+  .hub-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+  .hub-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 30px;
+    margin-bottom: 10px;
+  }
+  .hub-section p {
+    font-size: 14px;
+    color: var(--text-2);
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  .hub-feed {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .hub-feed-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--text-3);
+  }
+
+  /* ---------- FOOTER ---------- */
+  .footer-note {
+    text-align: center;
+    margin-top: 52px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-3);
+    line-height: 1.8;
+  }
+  .footer-note strong { color: var(--text-2); }
+
+  @media (max-width: 600px) {
+    .wrap { padding: 40px 16px 60px; }
+    .module-head { flex-direction: column; align-items: flex-start; }
+    .module-progress { text-align: left; }
+    .asset-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 420px) {
+    .asset-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="leather-bg"></div>
+<svg class="grain-overlay" width="100%" height="100%">
+  <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter>
+  <rect width="100%" height="100%" filter="url(#grain)"/>
+</svg>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">Moco Food Services — Internal Sales Platform</div>
+    <h1>One link. <em>Everything</em> a rep needs.</h1>
+    <p class="sub">18 tools, quizzes, simulators and references — built on a single design system — so the team walks into every call ready.</p>
+
+    <div class="progress-strip">
+      <div class="progress-stat">
+        <div class="num">1</div>
+        <div class="label">Built</div>
+      </div>
+      <div class="progress-stat">
+        <div class="num">2</div>
+        <div class="label">Drafted</div>
+      </div>
+      <div class="progress-stat">
+        <div class="num">15</div>
+        <div class="label">To build</div>
+      </div>
+      <div class="progress-stat">
+        <div class="num">42</div>
+        <div class="label">Brands live</div>
+      </div>
+    </div>
+
+    <div class="progress-bar-outer">
+      <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
+      <div class="progress-bar-caption">Brand Guide complete · 17 tools + Hub remaining</div>
+    </div>
+  </div>
+
+  <!-- JOURNEY -->
+  <div class="journey">
+    <div class="journey-node"><span class="journey-dot"></span> Product Knowledge</div>
+    <span class="journey-arrow">→</span>
+    <div class="journey-node"><span class="journey-dot"></span> Sales Skills</div>
+    <span class="journey-arrow">→</span>
+    <div class="journey-node"><span class="journey-dot"></span> Territory Context</div>
+    <span class="journey-arrow">→</span>
+    <div class="journey-node"><span class="journey-dot"></span> Live Practice</div>
+    <span class="journey-arrow">→</span>
+    <div class="journey-node"><span class="journey-dot" style="background:var(--gold)"></span> Hub</div>
+  </div>
+
+  <!-- MODULE 1 -->
+  <div class="module" data-mod="1">
+    <div class="module-head">
+      <div class="module-title-block">
+        <span class="module-num">Module I</span>
+        <div>
+          <div class="module-title">Sales Skills</div>
+          <div class="module-tagline">SPIN selling, objection handling, negotiation</div>
+        </div>
+      </div>
+      <div class="module-progress"><strong>0</strong> of 5 built</div>
+    </div>
+    <div class="module-body">
+      <div class="asset-grid">
+        <div class="asset-card progress">
+          <div class="asset-top"><span class="asset-type">Tool</span><span class="status-pill progress">Drafted</span></div>
+          <div class="asset-name">Objection Handler</div>
+          <div class="asset-desc">10 objections, SPIN coaching feedback, rebuttal builder</div>
+        </div>
+        <div class="asset-card progress">
+          <div class="asset-top"><span class="asset-type">Tool</span><span class="status-pill progress">Drafted</span></div>
+          <div class="asset-name">SPIN Question Builder</div>
+          <div class="asset-desc">Prebuilt sets by customer type + AI custom generator</div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-top"><span class="asset-type">Simulator</span><span class="status-pill todo">To build</span></div>
+          <div class="asset-name">Conversation Paths</div>
+          <div class="asset-desc">Choose-your-path sales conversations, scored outcomes</div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-top"><span class="asset-type">Tool</span><span class="status-pill todo">To build</span></div>
+          <div class="asset-name">Pre-Call Planner</div>
+          <div class="asset-desc">Checklist, customer research template, goal setter</div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-top"><span class="asset-type">Quiz</span><span class="status-pill todo">To build</span></div>
+          <div class="asset-name">Question Sequencing</div>
+          <div class="asset-desc">Identify the type, rank the sequence, pick the best response</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 2 -->
+  <div class="module" data-mod="2">
+    <div class="module-head">
+      <div class="module-title-block">
+        <span class="module-num">Module II</span>
+        <div>
+          <div class="module-title">Product Knowledge</div>
+          <div class="module-tagline">Species, cuts, grades, provenance, cooking</div>
+        </div>
+      </div>
+      <div class="module-progress"><strong>1</strong> of 6 built</div>
+    </div>
+    <div class="module-body">
+      <div class="asset-grid">
+        <div class="asset-card done">
+          <div class="asset-top"><span class="asset-type">Reference</span><span class="status-pill done">Live</span></div>
+          <div class="asset-name">Brand Guide</div>
+          <div class="asset-desc">Master product reference — all 42 brands, photos &amp; logos wired</div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-top"><span class="asset-type">Quiz</span><span class="status-pill todo">To build</span></div>
+          <div class="asset-name">Wagyu Knowledge</div>
+          <div class="asset-desc">Marbling grades, bloodlines, brand stories, BMS scoring</div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-top"><span class="asset-type">Reference</span><span class="status-pill todo">To build</span></div>
+          <div class="asset-name">Cut Guide</div>
+          <div class="asset-desc">Primal map, portion cuts, MSA grading, cooking methods</div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-top"><span class="asset-type">Reference</span><span class="status-pill todo">To build</span></div>
+          <div class="asset-name">Beyond Beef</div>
+          <div class="asset-desc">Lamb, pork, chicken, duck, quail — cuts, uses, seasonality</div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-top"><span class="asset-type">Quiz</span><span class="status-pill todo">To build</span></div>
+          <div class="asset-name">Name The Cut</div>
+          <div class="asset-desc">Photo-based — cut, cooking method, right spec</div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-top"><span class="asset-type">Tool</span><span class="status-pill todo">To build</span></div>
+          <div class="asset-name">GP Calculator</div>
+          <div class="asset-desc">Cost price + portion weight → GP% and sell price</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 3 -->
+  <div class="module" data-mod="3">
+    <div class="module-head">
+      <div class="module-title-block">
+        <span class="module-num">Module III</span>
+        <div>
+          <div class="module-title">Territory &amp; Customer Knowledge</div>
+          <div class="module-tagline">SEQ + Northern Rivers, venue types, local context</div>
+        </div>
+      </div>
+      <div class="module-progress"><strong>0</strong> of 3 built</div>
+    </div>
+    <div class="module-body">
+      <div class="asset-grid">
+        <div class="asset-card">
+          <div class="asset-top"><span class="asset-type">Reference</span><span class="status-pill todo">To build</span></div>
+          <div class="asset-name">Territory Map</div>
+          <div class="asset-desc">SEQ zones, Northern Rivers towns, key venue clusters by region</div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-top"><span class="asset-type">Reference</span><span class="status-pill todo">To build</span></div>
+          <div class="asset-name">Venue Playbook</div>
+          <div class="asset-desc">Pub, club, restaurant, cafe — buying behaviour, pain points, decision makers</div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-top"><span class="asset-type">Quiz</span><span class="status-pill todo">To build</span></div>
+          <div class="asset-name">Read The Room</div>
+          <div class="asset-desc">Scenario → identify venue type and correct sales approach</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 4 -->
+  <div class="module" data-mod="4">
+    <div class="module-head">
+      <div class="module-title-block">
+        <span class="module-num">Module IV</span>
+        <div>
+          <div class="module-title">Live Practice</div>
+          <div class="module-tagline">Roleplay, scenario practice, manager-led coaching</div>
+        </div>
+      </div>
+      <div class="module-progress"><strong>0</strong> of 3 built</div>
+    </div>
+    <div class="module-body">
+      <div class="asset-grid">
+        <div class="asset-card">
+          <div class="asset-top"><span class="asset-type">Simulator</span><span class="status-pill todo">To build</span></div>
+          <div class="asset-name">AI Roleplay Buyer</div>
+          <div class="asset-desc">Rep chats with a simulated customer — AI plays the buyer, coaches after</div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-top"><span class="asset-type">Reference</span><span class="status-pill todo">To build</span></div>
+          <div class="asset-name">Manager Scorecard</div>
+          <div class="asset-desc">Ride-alongs and call reviews — SPIN, objections, close</div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-top"><span class="asset-type">Reference</span><span class="status-pill todo">To build</span></div>
+          <div class="asset-name">Weekly Focus</div>
+          <div class="asset-desc">One skill per week, team challenge, manager debrief prompt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HUB -->
+  <div class="hub-section">
+    <div class="hub-eyebrow">Built Last — Connects Everything</div>
+    <h2>The Training Hub</h2>
+    <p>Module cards, progress tracker, and one link to every tool and quiz — the front door the team opens before any call.</p>
+    <div class="hub-feed">
+      <span class="hub-feed-dot"></span><span class="hub-feed-dot"></span><span class="hub-feed-dot"></span>
+      <span class="hub-feed-dot"></span><span class="hub-feed-dot"></span><span class="hub-feed-dot"></span>
+      <span class="hub-feed-dot"></span><span class="hub-feed-dot"></span><span class="hub-feed-dot"></span>
+      <span class="hub-feed-dot"></span><span class="hub-feed-dot"></span><span class="hub-feed-dot"></span>
+      <span class="hub-feed-dot"></span><span class="hub-feed-dot"></span><span class="hub-feed-dot"></span>
+      <span class="hub-feed-dot"></span><span class="hub-feed-dot"></span><span class="hub-feed-dot" style="background:var(--gold)"></span>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <strong>Mobile-first, single HTML file per tool, one consistent design language.</strong><br>
+    A rep can open this on their phone in a car park before any call.
+  </div>
+
+</div>
+
+</body>
+</html>

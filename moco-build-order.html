@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moco Meats — Build Order</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F0E0B;
+    --bg-card: #1A1814;
+    --bg-raised: #222018;
+    --gold: #C4973A;
+    --gold-dim: rgba(196,151,58,0.32);
+    --gold-pale: rgba(196,151,58,0.08);
+    --text-1: #F0EAE0;
+    --text-2: #A09078;
+    --text-3: #564A3C;
+    --border: rgba(196,151,58,0.10);
+    --border-hi: rgba(196,151,58,0.28);
+
+    --m1: #B2492F;
+    --m2: #8B6F3A;
+    --m3: #3A6B5E;
+    --m4: #4A5A8B;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-1);
+    font-family: 'DM Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .leather-bg {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 120% 80% at 20% -10%, rgba(196,151,58,0.10) 0%, transparent 55%),
+      radial-gradient(ellipse 100% 70% at 90% 110%, rgba(178,73,47,0.08) 0%, transparent 55%),
+      var(--bg);
+    pointer-events: none;
+  }
+
+  .wrap {
+    position: relative; z-index: 2;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 56px 28px 90px;
+  }
+
+  .hero { text-align: center; margin-bottom: 56px; }
+  .hero-eyebrow {
+    font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--gold); font-weight: 500; margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif; font-weight: 700;
+    font-size: clamp(32px, 5.5vw, 50px); line-height: 1.1; margin-bottom: 14px;
+  }
+  .hero h1 em { font-style: italic; font-weight: 400; color: var(--gold); }
+  .hero p {
+    font-size: 15px; color: var(--text-2); max-width: 460px;
+    margin: 0 auto; line-height: 1.6;
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 9px; top: 10px; bottom: 10px;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--gold-dim), var(--border), var(--border));
+  }
+
+  .stage {
+    position: relative;
+    margin-bottom: 8px;
+  }
+  .stage-marker {
+    position: absolute;
+    left: -32px; top: 4px;
+    width: 19px; height: 19px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--text-3);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .stage.done .stage-marker { border-color: var(--gold); background: var(--gold); }
+  .stage.now .stage-marker { border-color: var(--gold); }
+  .stage.now .stage-marker::after {
+    content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--gold);
+  }
+
+  .stage-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 26px 22px;
+    margin-bottom: 36px;
+  }
+  .stage.now .stage-card { border-color: var(--gold-dim); }
+
+  .stage-label {
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-3); margin-bottom: 6px; display: flex; align-items: center; gap: 10px;
+  }
+  .stage-label .now-tag {
+    background: rgba(196,151,58,0.16); color: var(--gold);
+    padding: 2px 9px; border-radius: 99px; font-size: 10px; letter-spacing: 0.06em;
+    border: 1px solid var(--gold-dim);
+  }
+  .stage-label .done-tag {
+    color: var(--gold); font-size: 13px; letter-spacing: 0;
+  }
+
+  .stage-title {
+    font-family: 'Playfair Display', serif; font-weight: 700;
+    font-size: 21px; margin-bottom: 6px;
+  }
+  .stage-why {
+    font-size: 13px; color: var(--text-2); line-height: 1.6;
+    margin-bottom: 18px;
+    font-style: italic;
+    padding-left: 14px;
+    border-left: 2px solid var(--border);
+  }
+
+  .stage-items { display: flex; flex-direction: column; gap: 10px; }
+  .stage-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px;
+    background: var(--bg-raised);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .item-mod-tag {
+    font-size: 9px; font-weight: 600; letter-spacing: 0.05em;
+    padding: 3px 7px; border-radius: 5px; white-space: nowrap;
+    text-transform: uppercase;
+  }
+  .item-mod-tag.m1 { background: rgba(178,73,47,0.18); color: #D6815F; }
+  .item-mod-tag.m2 { background: rgba(139,111,58,0.2); color: #D1AD5C; }
+  .item-mod-tag.m3 { background: rgba(58,107,94,0.2); color: #6FAE9A; }
+  .item-mod-tag.m4 { background: rgba(74,90,139,0.2); color: #8C9CD6; }
+  .item-mod-tag.hub { background: rgba(196,151,58,0.2); color: var(--gold); }
+
+  .item-name { font-weight: 500; font-size: 14px; flex: 1; min-width: 160px; }
+  .item-effort {
+    font-size: 11px; color: var(--text-3); white-space: nowrap;
+  }
+  .effort-dots { display: inline-flex; gap: 2px; vertical-align: middle; margin-left: 6px; }
+  .effort-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border-hi); }
+  .effort-dot.filled { background: var(--text-2); }
+
+  .stage-flag {
+    font-size: 9px; padding: 2px 8px; border-radius: 99px;
+    background: rgba(196,151,58,0.12); color: var(--gold);
+    border: 1px solid var(--gold-dim); white-space: nowrap;
+  }
+
+  .legend {
+    display: flex; justify-content: center; gap: 22px;
+    margin-bottom: 50px; flex-wrap: wrap;
+    font-size: 12px; color: var(--text-2);
+  }
+  .legend-item { display: flex; align-items: center; gap: 7px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .footer-note {
+    text-align: center; margin-top: 56px; padding-top: 26px;
+    border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--text-3); line-height: 1.8;
+  }
+  .footer-note strong { color: var(--text-2); }
+
+  @media (max-width: 560px) {
+    .wrap { padding: 40px 16px 70px; }
+    .stage-card { padding: 20px 18px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="leather-bg"></div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="hero-eyebrow">Moco Meats — Solo Build Plan</div>
+    <h1>The order things get <em>built</em>.</h1>
+    <p>Not a calendar — a sequence. Each stage either finishes momentum already in motion, or sets up the next one to be easier.</p>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:var(--m1)"></span> Sales Skills</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--m2)"></span> Product Knowledge</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--m3)"></span> Territory</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--m4)"></span> Live Practice</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--gold)"></span> Hub</div>
+  </div>
+
+  <div class="timeline">
+
+    <div class="stage done">
+      <div class="stage-marker"></div>
+      <div class="stage-card">
+        <div class="stage-label"><span class="done-tag">✓ Complete</span></div>
+        <div class="stage-title">Brand Guide</div>
+        <div class="stage-why">Foundation reference — the design system everything else inherits. Done first because it has to be: every other tool reuses these tokens, components, and the dark/gold/leather language.</div>
+        <div class="stage-items">
+          <div class="stage-item">
+            <span class="item-mod-tag m2">Product Knowledge</span>
+            <span class="item-name">Brand Guide — 42 brands, photos &amp; logos live</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage now">
+      <div class="stage-marker"></div>
+      <div class="stage-card">
+        <div class="stage-label"><span class="now-tag">Next</span> Stage 1 of 5</div>
+        <div class="stage-title">Finish What's Started</div>
+        <div class="stage-why">Both tools are already drafted in GitHub — this is design polish against a system you've now locked, not a build from zero. Fastest possible win, and the SPIN framework these produce is something the Live Practice module will lean on later.</div>
+        <div class="stage-items">
+          <div class="stage-item">
+            <span class="item-mod-tag m1">Sales Skills</span>
+            <span class="item-name">Objection Handler</span>
+            <span class="item-effort">Polish only<span class="effort-dots"><span class="effort-dot filled"></span><span class="effort-dot"></span><span class="effort-dot"></span></span></span>
+          </div>
+          <div class="stage-item">
+            <span class="item-mod-tag m1">Sales Skills</span>
+            <span class="item-name">SPIN Question Builder</span>
+            <span class="item-effort">Polish + finalise<span class="effort-dots"><span class="effort-dot filled"></span><span class="effort-dot filled"></span><span class="effort-dot"></span></span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-marker"></div>
+      <div class="stage-card">
+        <div class="stage-label">Stage 2 of 5</div>
+        <div class="stage-title">Round Out Product Knowledge</div>
+        <div class="stage-why">Same domain you're already deep in — no context-switch. References first, quizzes after (quizzes need something to quiz on). GP Calculator is small and self-contained — a good confidence-builder between bigger pieces.</div>
+        <div class="stage-items">
+          <div class="stage-item">
+            <span class="item-mod-tag m2">Product Knowledge</span>
+            <span class="item-name">Cut Guide — primal map, MSA grading</span>
+            <span class="item-effort">Reference<span class="effort-dots"><span class="effort-dot filled"></span><span class="effort-dot filled"></span><span class="effort-dot"></span></span></span>
+          </div>
+          <div class="stage-item">
+            <span class="item-mod-tag m2">Product Knowledge</span>
+            <span class="item-name">Beyond Beef — lamb, pork, chicken, duck, quail</span>
+            <span class="item-effort">Reference<span class="effort-dots"><span class="effort-dot filled"></span><span class="effort-dot filled"></span><span class="effort-dot"></span></span></span>
+          </div>
+          <div class="stage-item">
+            <span class="item-mod-tag m2">Product Knowledge</span>
+            <span class="item-name">GP Calculator</span>
+            <span class="item-effort">Small tool<span class="effort-dots"><span class="effort-dot filled"></span><span class="effort-dot"></span><span class="effort-dot"></span></span></span>
+          </div>
+          <div class="stage-item">
+            <span class="item-mod-tag m2">Product Knowledge</span>
+            <span class="item-name">Wagyu Knowledge Quiz</span>
+            <span class="item-effort">Quiz<span class="effort-dots"><span class="effort-dot filled"></span><span class="effort-dot"></span><span class="effort-dot"></span></span></span>
+          </div>
+          <div class="stage-item">
+            <span class="item-mod-tag m2">Product Knowledge</span>
+            <span class="item-name">Name The Cut — photo quiz</span>
+            <span class="item-effort">Quiz, needs photo assets<span class="effort-dots"><span class="effort-dot filled"></span><span class="effort-dot filled"></span><span class="effort-dot"></span></span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-marker"></div>
+      <div class="stage-card">
+        <div class="stage-label">Stage 3 of 5</div>
+        <div class="stage-title">Territory &amp; Customer Knowledge</div>
+        <div class="stage-why">Fully independent of everything else — about your patch and venue types, not product mechanics. Doesn't block or get blocked by anything. Genuine flexibility on timing — good module to drop in if you want a change of pace from product content.</div>
+        <div class="stage-items">
+          <div class="stage-item">
+            <span class="item-mod-tag m3">Territory</span>
+            <span class="item-name">Territory Map — SEQ + Northern Rivers</span>
+            <span class="item-effort">Reference<span class="effort-dots"><span class="effort-dot filled"></span><span class="effort-dot filled"></span><span class="effort-dot"></span></span></span>
+          </div>
+          <div class="stage-item">
+            <span class="item-mod-tag m3">Territory</span>
+            <span class="item-name">Venue Playbook — buying behaviour by venue type</span>
+            <span class="item-effort">Reference<span class="effort-dots"><span class="effort-dot filled"></span><span class="effort-dot filled"></span><span class="effort-dot"></span></span></span>
+          </div>
+          <div class="stage-item">
+            <span class="item-mod-tag m3">Territory</span>
+            <span class="item-name">Read The Room — scenario quiz</span>
+            <span class="item-effort">Quiz<span class="effort-dots"><span class="effort-dot filled"></span><span class="effort-dot"></span><span class="effort-dot"></span></span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-marker"></div>
+      <div class="stage-card">
+        <div class="stage-label">Stage 4 of 5</div>
+        <div class="stage-title">Live Practice</div>
+        <div class="stage-why">Deliberately last before the Hub. The AI Roleplay Buyer is the biggest technical build on the whole list — live AI conversation, scoring logic — and it's genuinely better once SPIN, objections, and product knowledge already exist for it to coach against. Scorecard and Weekly Focus are lighter and could realistically move earlier if useful.</div>
+        <div class="stage-items">
+          <div class="stage-item">
+            <span class="item-mod-tag m4">Live Practice</span>
+            <span class="item-name">Manager Scorecard</span>
+            <span class="item-effort">Reference<span class="effort-dots"><span class="effort-dot filled"></span><span class="effort-dot"></span><span class="effort-dot"></span></span></span>
+          </div>
+          <div class="stage-item">
+            <span class="item-mod-tag m4">Live Practice</span>
+            <span class="item-name">Weekly Focus — team challenge template</span>
+            <span class="item-effort">Reference<span class="effort-dots"><span class="effort-dot filled"></span><span class="effort-dot"></span><span class="effort-dot"></span></span></span>
+          </div>
+          <div class="stage-item">
+            <span class="item-mod-tag m4">Live Practice</span>
+            <span class="item-name">AI Roleplay Buyer</span>
+            <span class="item-effort">Biggest build<span class="effort-dots"><span class="effort-dot filled"></span><span class="effort-dot filled"></span><span class="effort-dot filled"></span></span></span>
+            <span class="stage-flag">Needs other modules done</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-marker"></div>
+      <div class="stage-card">
+        <div class="stage-label">Stage 5 of 5 — Final</div>
+        <div class="stage-title">The Hub</div>
+        <div class="stage-why">Built last, on purpose, per the original platform principle: it connects everything, so everything needs to exist first. The reward stage — pulling 17 finished tools into one front door.</div>
+        <div class="stage-items">
+          <div class="stage-item">
+            <span class="item-mod-tag hub">Hub</span>
+            <span class="item-name">Training Hub — module cards, progress tracker, one link</span>
+            <span class="item-effort">Ties it together<span class="effort-dots"><span class="effort-dot filled"></span><span class="effort-dot filled"></span><span class="effort-dot"></span></span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-note">
+    <strong>This is a sequence, not a deadline.</strong><br>
+    Stage order can flex — Territory (Stage 3) has no dependencies and can move earlier anytime you want variety.
+  </div>
+
+</div>
+
+</body>
+</html>
