@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Moco Meats — Brand Guide</title>
+<!-- Fix 2: Preconnect hints for faster font loading -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Fix 1: font-display=swap explicitly requested -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+
+/* ── DESIGN TOKENS ── */
+:root {
+  /* Base */
+  --bg:          #0F0E0B;
+  --bg-card:     #1A1814;
+  --bg-raised:   #222018;
+  --gold:        #C4973A;
+  --gold-dim:    rgba(196,151,58,0.32);
+  --gold-pale:   rgba(196,151,58,0.08);
+  --text-1:      #F0EAE0;
+  --text-2:      #A09078;
+  --text-3:      #564A3C;
+  --border:      rgba(196,151,58,0.10);
+  --border-hi:   rgba(196,151,58,0.28);
+  --ease:        cubic-bezier(0.4,0,0.2,1);
+  --ease-back:   cubic-bezier(0.2,0,0.4,1);
+  --dur-fwd:     0.34s;
+  --dur-back:    0.22s;
+
+  /* Category colour systems */
+  --wagyu-bg:       #0A0806;
+  --wagyu-accent:   #8B2A12;
+  --wagyu-glow:     rgba(139,42,18,0.18);
+  --wagyu-border:   rgba(196,151,58,0.22);
+  --wagyu-tint:     rgba(80,15,5,0.55);
+
+  --grain-bg:       #0C0A06;
+  --grain-accent:   #8B6018;
+  --grain-glow:     rgba(139,96,24,0.18);
+  --grain-border:   rgba(196,151,58,0.20);
+  --grain-tint:     rgba(80,55,5,0.50);
+
+  --grass-bg:       #060C07;
+  --grass-accent:   #2A5C22;
+  --grass-glow:     rgba(42,92,34,0.20);
+  --grass-border:   rgba(42,92,34,0.28);
+  --grass-tint:     rgba(10,40,10,0.55);
+
+  --moco-bg:        #060810;
+  --moco-accent:    #1A3A8B;
+  --moco-glow:      rgba(26,58,139,0.20);
+  --moco-border:    rgba(100,130,200,0.22);
+  --moco-tint:      rgba(5,10,40,0.55);
+
+  --lamb-bg:        #0C0806;
+  --lamb-accent:    #7A3A18;
+  --lamb-glow:      rgba(122,58,24,0.18);
+  --lamb-border:    rgba(180,120,80,0.22);
+  --lamb-tint:      rgba(60,20,5,0.50);
+
+  --pork-bg:        #0C060C;
+  --pork-accent:    #6A2258;
+  --pork-glow:      rgba(106,34,88,0.18);
+  --pork-border:    rgba(180,100,160,0.22);
+  --pork-tint:      rgba(50,5,40,0.50);
+
+  --acacia-bg:      #061008;
+  --acacia-accent:  #1A3A1C;
+  --acacia-glow:    rgba(26,58,28,0.22);
+  --acacia-border:  rgba(43,107,53,0.30);
+  --acacia-tint:    rgba(5,30,8,0.55);
+
+  /* Active category (set by JS) */
+  --cat-tint:   transparent;
+  --cat-glow:   transparent;
+  --cat-border-col: rgba(196,151,58,0.10);
+}
+
+/* ── RESET ── */
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { height:100%; background:var(--bg); color:var(--text-1); font-family:'DM Sans',sans-serif; overflow:hidden; -webkit-font-smoothing:antialiased; }
+
+/* ── SCREENS ── */
+#app { position:fixed; inset:0; overflow:hidden; }
+.screen {
+  position:absolute; inset:0; background:var(--bg);
+  overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch;
+  transform:translateX(100%);
+  transition:transform 0.32s cubic-bezier(0.4,0,0.2,1);
+  will-change:transform;
+  -webkit-backface-visibility:hidden;
+  backface-visibility:hidden;
+}
+.screen.active { transform:translateX(0); }
+.screen.behind { transform:translateX(-22%); }
+
+/* ── TOPBAR ── */
+.topbar {
+  position:sticky; top:0; z-index:20;
+  height:48px; display:flex; align-items:center; gap:10px; padding:0 14px;
+  background:rgba(15,14,11,0.88);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  /* Category tint overlaid via pseudo-element */
+  transition:border-color 0.4s ease;
+}
+.topbar::after {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:var(--cat-tint);
+  transition:background 0.4s ease;
+  z-index:-1;
+}
+.back-btn {
+  display:flex; align-items:center; gap:4px;
+  background:none; border:none; color:var(--gold);
+  font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500;
+  cursor:pointer; padding:8px 2px; flex-shrink:0; white-space:nowrap;
+}
+.back-btn svg { width:14px; height:14px; }
+
+/* ── BREADCRUMB BAR ── */
+.bc-bar {
+  display:flex; align-items:center; gap:5px;
+  padding:8px 16px; border-bottom:1px solid var(--border);
+  background:rgba(15,14,11,0.7); overflow-x:auto;
+  scrollbar-width:none; -ms-overflow-style:none; flex-shrink:0;
+}
+.bc-bar::-webkit-scrollbar { display:none; }
+.bc-link {
+  font-size:11px; font-weight:500; color:var(--text-3);
+  white-space:nowrap; cursor:pointer; padding:2px 0;
+  transition:color 0.15s ease;
+}
+.bc-link:active,.bc-link:hover { color:var(--text-2); }
+.bc-sep { font-size:10px; color:var(--text-3); opacity:0.4; }
+.bc-cur { font-size:11px; font-weight:500; color:var(--gold); white-space:nowrap; }
+
+/* ── SECTION HERO ── */
+.section-hero {
+  padding:34px 20px 26px; text-align:center;
+  border-bottom:1px solid var(--border);
+  position:relative; overflow:hidden;
+}
+.section-hero::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse 80% 90% at 50% 0%, var(--cat-glow,rgba(196,151,58,0.06)) 0%, transparent 68%);
+  transition:background 0.4s ease;
+}
+/* Grain texture on section hero */
+.section-hero::after {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  opacity:0.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-size:180px 180px;
+}
+.sh-icon { width:54px; height:54px; margin:0 auto 14px; color:var(--text-2); }
+.sh-icon svg { width:100%; height:100%; }
+.sh-eyebrow {
+  font-size:10px; font-weight:600; letter-spacing:0.2em;
+  text-transform:uppercase; color:var(--gold); margin-bottom:8px;
+}
+.sh-title {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(30px,8vw,44px); font-weight:700;
+  color:var(--text-1); letter-spacing:-0.02em; line-height:1.1; margin-bottom:10px;
+  /* Fix 3: hero title fade-in handled on home; section heroes animate in with screen */
+}
+.sh-rule { width:28px; height:1px; background:var(--gold); opacity:0.4; margin:0 auto 10px; }
+.sh-sub { font-size:12px; color:var(--text-2); }
+
+/* ── HOME SCREEN ── */
+.screen#sc-home { background:var(--bg); }
+.home-wrap { display:flex; flex-direction:column; min-height:100%; }
+
+/* Leather hero — dark, textured, steakhouse menu cover */
+.hero {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:32px 24px 24px; text-align:center; position:relative; overflow:hidden;
+}
+@media(min-height:700px){.hero{padding:50px 24px 34px;}}
+
+/* Leather base — layered gradients simulating grain and depth */
+.hero::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(40,28,16,0.95) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 40% at 30% 80%, rgba(30,20,10,0.6) 0%, transparent 60%),
+    linear-gradient(160deg, #1A1208 0%, #0F0E0B 40%, #12100A 100%);
+}
+
+/* Leather grain overlay */
+.hero::after {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  opacity:0.055;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='leather'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23leather)' opacity='1'/%3E%3C/svg%3E");
+  background-size:280px 280px;
+  mix-blend-mode:overlay;
+}
+
+/* Fix 3: Hero content fades in, masking any font-swap flash */
+.hero-content {
+  position:relative; z-index:1;
+  animation: heroFadeUp 0.55s cubic-bezier(0.2,0,0.4,1) both;
+}
+@keyframes heroFadeUp {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.eyebrow {
+  font-size:10px; font-weight:600; letter-spacing:0.22em;
+  text-transform:uppercase; color:var(--gold); margin-bottom:12px;
+}
+.hero-name {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(34px,9vw,58px); font-weight:700;
+  letter-spacing:-0.02em; line-height:1.05; color:var(--text-1); margin-bottom:6px;
+}
+.hero-sub {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(12px,3vw,17px); font-style:italic; font-weight:400;
+  color:var(--text-2); margin-bottom:20px;
+}
+.hero-rule { width:32px; height:1px; background:var(--gold); opacity:0.4; margin:0 auto 16px; }
+.hero-prompt {
+  font-size:11px; font-weight:500; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--text-3);
+}
+
+/* ── SPECIES GRID ── */
+.species-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
+  padding:4px 14px 40px; max-width:700px; margin:0 auto; width:100%;
+  position:relative; z-index:1;
+}
+@media(min-width:640px){.species-grid{grid-template-columns:repeat(4,1fr);padding:4px 24px 56px;max-width:960px;}}
+.species-card {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
+  padding:26px 14px 22px; display:flex; flex-direction:column;
+  align-items:center; gap:10px; cursor:pointer; text-align:center;
+  transition:border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+  -webkit-user-select:none; user-select:none;
+}
+.species-card:active { border-color:var(--border-hi); background:var(--bg-raised); transform:scale(0.97); }
+@media(hover:hover){.species-card:hover{border-color:var(--border-hi);background:var(--bg-raised);transform:translateY(-3px);}}
+.s-icon { width:46px; height:46px; color:var(--text-2); }
+.s-icon svg { width:100%; height:100%; }
+.s-name { font-family:'Playfair Display',serif; font-size:17px; font-weight:600; color:var(--text-1); }
+.s-count { font-size:11px; color:var(--text-3); font-weight:500; }
+.home-footer { margin-top:auto; padding:16px; text-align:center; border-top:1px solid var(--border); position:relative; z-index:1; }
+.home-footer p { font-size:10px; color:var(--text-3); letter-spacing:0.08em; }
+
+/* ── SCREEN CONTENT ── */
+.s-content { padding:20px 14px 52px; max-width:960px; margin:0 auto; width:100%; }
+@media(min-width:640px){.s-content{padding:24px 24px 64px;}}
+.s-meta {
+  font-size:10px; font-weight:600; letter-spacing:0.17em;
+  text-transform:uppercase; color:var(--text-3);
+  margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border);
+}
+
+/* ── CATEGORY CARDS ── */
+.cat-list { display:flex; flex-direction:column; gap:9px; }
+.cat-card {
+  background:var(--bg-card); border:1px solid var(--border);
+  border-left:3px solid var(--cat-accent,var(--gold));
+  border-radius:12px; padding:18px 16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  transition:all 0.15s ease; -webkit-user-select:none; user-select:none;
+  position:relative; overflow:hidden;
+}
+/* Subtle category glow on left side of each cat card */
+.cat-card::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:60%;
+  background:linear-gradient(90deg, var(--cat-card-glow, transparent) 0%, transparent 100%);
+  pointer-events:none;
+}
+.cat-card:active { background:var(--bg-raised); transform:translateX(3px); }
+@media(hover:hover){.cat-card:hover{background:var(--bg-raised);transform:translateX(4px);border-color:var(--border-hi);}}
+.cat-left { display:flex; flex-direction:column; gap:3px; position:relative; }
+.cat-name { font-family:'Playfair Display',serif; font-size:18px; font-weight:600; color:var(--text-1); }
+.cat-desc { font-size:12px; color:var(--text-2); }
+.moco-tag {
+  display:inline-block; font-size:9px; font-weight:700; letter-spacing:0.12em;
+  text-transform:uppercase; color:#8899CC;
+  background:rgba(26,58,139,0.14); border:1px solid rgba(100,130,200,0.18);
+  border-radius:20px; padding:2px 8px; margin-top:4px; width:fit-content;
+}
+.cat-right { display:flex; align-items:center; gap:10px; flex-shrink:0; position:relative; }
+.cat-pill {
+  font-size:11px; font-weight:600; color:var(--gold);
+  background:var(--gold-pale); border:1px solid var(--gold-dim);
+  border-radius:20px; padding:3px 10px; white-space:nowrap;
+}
+.cat-arrow { color:var(--text-3); font-size:16px; }
+
+/* ── BRAND GRID ── */
+.tier-block { margin-bottom:26px; }
+.tier-row { display:flex; align-items:center; gap:10px; margin-bottom:11px; }
+.tier-tag {
+  font-size:9px; font-weight:700; letter-spacing:0.2em;
+  text-transform:uppercase; white-space:nowrap;
+}
+.tier-tag.sp { color:var(--gold); }
+.tier-tag.pr { color:#B09070; }
+.tier-tag.mr { color:var(--text-2); }
+.tier-tag.en { color:var(--text-3); }
+.tier-tag.fe { color:#8899CC; }
+.tier-line { flex:1; height:1px; background:var(--border); }
+.brands-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+@media(min-width:560px){.brands-grid{grid-template-columns:repeat(3,1fr);}}
+@media(min-width:860px){.brands-grid{grid-template-columns:repeat(4,1fr);}}
+
+/* ── BRAND CARDS — tiered hierarchy ── */
+.brand-card {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+  padding:14px 13px; cursor:pointer; display:flex; flex-direction:column;
+  gap:8px; min-height:130px;
+  transition:all 0.15s ease; -webkit-user-select:none; user-select:none;
+  position:relative; overflow:hidden;
+}
+
+/* Super Premium — full width, taller, dramatic */
+.brand-card.sp {
+  grid-column: span 2;
+  min-height:160px;
+  background:linear-gradient(145deg, var(--sp-card-bg-a, #17100A) 0%, var(--sp-card-bg-b, #1A1814) 100%);
+  border-color:var(--sp-card-border, rgba(196,151,58,0.22));
+  box-shadow:inset 0 1px 0 rgba(196,151,58,0.08), 0 4px 24px rgba(0,0,0,0.4);
+}
+@media(min-width:560px){
+  .brand-card.sp { grid-column:span 1; min-height:175px; }
+}
+/* Grain overlay on super premium cards */
+.brand-card.sp::after {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  opacity:0.04;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size:160px 160px;
+  mix-blend-mode:overlay;
+}
+/* Premium — standard size, slightly warmer */
+.brand-card.pr {
+  background:linear-gradient(145deg, var(--pr-card-bg, #1A1814) 0%, var(--bg-card) 100%);
+  border-color:var(--pr-card-border, var(--border));
+}
+/* Mid & Entry — clean, no gradient noise */
+.brand-card.mr, .brand-card.en {
+  background:var(--bg-card);
+}
+
+.brand-card:active { background:var(--bg-raised); transform:scale(0.97); }
+@media(hover:hover){
+  .brand-card:hover { background:var(--bg-raised); border-color:var(--border-hi); transform:translateY(-2px); }
+  .brand-card.sp:hover { background:linear-gradient(145deg, var(--sp-card-bg-a, #1f1610) 0%, #1e1c16 100%); }
+}
+
+.bc-photo {
+  width:100%; aspect-ratio:16/9; background:var(--bg-raised); border-radius:6px;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--text-3); font-size:10px; letter-spacing:0.1em;
+  text-transform:uppercase; font-weight:500; border:1px dashed rgba(196,151,58,0.12);
+}
+.bc-name {
+  font-family:'Playfair Display',serif; font-size:14px; font-weight:600;
+  color:var(--text-1); line-height:1.25;
+}
+.brand-card.sp .bc-name { font-size:17px; }
+.bc-tier { font-size:9px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; }
+.bc-tier.sp { color:var(--gold); }
+.bc-tier.pr { color:#B09070; }
+.bc-tier.mr { color:var(--text-2); }
+.bc-tier.en { color:var(--text-3); }
+.bc-cta { font-size:10px; color:var(--text-3); margin-top:auto; }
+
+/* ── MOCO BRANDS ── */
+.moco-notice {
+  background:rgba(26,58,139,0.10); border:1px solid rgba(100,130,200,0.18);
+  border-radius:12px; padding:12px 14px; font-size:12px; color:#8899CC;
+  line-height:1.55; margin-bottom:16px;
+}
+.moco-notice strong { color:#AAC0FF; }
+.moco-grid { display:grid; grid-template-columns:1fr; gap:10px; }
+@media(min-width:560px){.moco-grid{grid-template-columns:repeat(3,1fr);}}
+.moco-card {
+  background:linear-gradient(140deg,#0C0E1A 0%,#131522 100%);
+  border:1px solid rgba(100,130,200,0.2); border-radius:12px;
+  padding:22px 18px; cursor:pointer; position:relative;
+  transition:all 0.15s ease; -webkit-user-select:none; user-select:none;
+}
+.moco-card::after {
+  content:'MOCO BRANDS'; position:absolute; top:10px; right:12px;
+  font-size:8px; font-weight:700; letter-spacing:0.14em;
+  color:rgba(150,170,220,0.38);
+}
+.moco-card:active { transform:scale(0.97); border-color:rgba(100,130,200,0.4); }
+@media(hover:hover){.moco-card:hover{border-color:rgba(100,130,200,0.38);transform:translateY(-2px);}}
+.mc-name {
+  font-family:'Playfair Display',serif; font-size:18px; font-weight:600;
+  color:var(--text-1); margin-bottom:5px;
+}
+.mc-sub { font-size:11px; color:var(--text-3); }
+
+
+/* ── SECTION HERO — category stagger animation ── */
+.sh-title.animate-in {
+  animation: shTitleIn 0.38s cubic-bezier(0.2,0,0.4,1) 0.08s both;
+}
+@keyframes shTitleIn {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--gold-dim); border-radius:2px; }
+
+/* ── STAGE 3: BRAND DETAIL SHEET ── */
+#sheet-overlay {
+  position:fixed; inset:0; z-index:50;
+  background:rgba(8,7,5,0.75);
+  -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+  opacity:0; pointer-events:none;
+  transition:opacity 0.3s ease;
+}
+#sheet-overlay.open { opacity:1; pointer-events:auto; }
+
+#brand-sheet {
+  position:fixed; left:0; right:0; bottom:0; z-index:51;
+  height:90%; max-height:90vh;
+  background:var(--sheet-bg,#100806);
+  border-top:1px solid var(--sheet-border,rgba(196,151,58,0.25));
+  border-radius:18px 18px 0 0;
+  transform:translateY(100%);
+  transition:transform 0.32s cubic-bezier(0.4,0,0.2,1);
+  will-change:transform;
+  -webkit-backface-visibility:hidden;
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
+}
+#brand-sheet.open { transform:translateY(0); }
+
+#sheet-handle {
+  position:sticky; top:0; z-index:2;
+  width:100%; padding:10px 0 8px;
+  display:flex; justify-content:center;
+  background:inherit;
+}
+#sheet-handle::after {
+  content:''; width:36px; height:4px; border-radius:2px;
+  background:rgba(196,151,58,0.22);
+}
+
+/* Banner */
+.sheet-banner {
+  position:relative; aspect-ratio:3/1; overflow:hidden;
+  background:var(--banner-bg,#1A1210);
+  display:flex; align-items:center; justify-content:center;
+}
+.sheet-banner::after {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  opacity:0.05;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='sg'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23sg)'/%3E%3C/svg%3E");
+  background-size:160px 160px;
+}
+.sheet-banner-name {
+  font-family:'Playfair Display',serif; font-weight:700;
+  font-size:clamp(20px,6vw,30px);
+  color:var(--banner-text,rgba(196,151,58,0.20));
+  text-align:center; position:relative; z-index:1; padding:0 16px;
+}
+
+/* Logo */
+.sheet-logo-wrap { display:flex; justify-content:center; padding:16px 24px 0; }
+.sheet-logo { max-height:56px; max-width:200px; object-fit:contain; display:block; }
+
+/* Identity row */
+.sheet-identity { padding:18px 18px 0; }
+.sheet-name { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:var(--text-1); line-height:1.2; }
+.sheet-producer { font-size:11px; color:var(--text-2); margin-top:3px; }
+.sheet-pills { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+.sheet-pill { font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:4px 10px; border-radius:20px; }
+.sheet-pill.tier-sp { color:var(--gold); background:var(--gold-pale); border:1px solid var(--gold-dim); }
+.sheet-pill.tier-pr { color:#B09070; background:rgba(176,144,112,0.08); border:1px solid rgba(176,144,112,0.22); }
+.sheet-pill.tier-mr { color:var(--text-2); background:var(--bg-raised); border:1px solid var(--border); }
+.sheet-pill.tier-en { color:var(--text-3); background:var(--bg-raised); border:1px solid var(--border); }
+.sheet-pill.tier-fe { color:#8899CC; background:rgba(26,58,139,0.10); border:1px solid rgba(100,130,200,0.2); }
+.sheet-pill.cat-pill { color:var(--text-2); background:var(--bg-raised); border:1px solid var(--border); }
+
+/* Summary */
+.sheet-summary { padding:14px 18px 0; font-size:13px; color:var(--text-2); line-height:1.65; }
+
+/* Spec pills */
+.sheet-specs { display:flex; flex-wrap:wrap; gap:6px; padding:14px 18px; border-bottom:1px solid var(--border); }
+.spec-pill-s3 {
+  font-size:10px; font-weight:600; background:var(--bg-raised); color:var(--text-2);
+  border:1px solid rgba(196,151,58,0.10); border-radius:20px; padding:4px 10px;
+}
+
+/* Accordions */
+.acc-block { border-bottom:1px solid var(--border); }
+.acc-header {
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:16px 18px; cursor:pointer; -webkit-user-select:none; user-select:none;
+}
+.acc-title { font-size:13px; font-weight:600; color:var(--text-1); letter-spacing:0.02em; }
+.acc-chevron { color:var(--text-3); font-size:13px; transition:transform 0.28s cubic-bezier(0.4,0,0.2,1); flex-shrink:0; }
+.acc-block.open .acc-chevron { transform:rotate(180deg); }
+.acc-content { max-height:0; overflow:hidden; transition:max-height 0.28s cubic-bezier(0.4,0,0.2,1); }
+.acc-block.open .acc-content { max-height:2000px; }
+.acc-content-inner { padding:0 18px 18px; }
+
+.selling-points-s3 { list-style:none; display:flex; flex-direction:column; gap:8px; }
+.selling-points-s3 li { font-size:13px; color:var(--text-2); line-height:1.55; padding-left:16px; position:relative; }
+.selling-points-s3 li::before { content:'→'; position:absolute; left:0; color:var(--gold); font-size:11px; top:1px; }
+
+.prov-text { font-size:13px; color:var(--text-2); line-height:1.65; }
+
+.venue-chips-s3 { display:flex; flex-wrap:wrap; gap:6px; }
+.venue-chip { font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; color:var(--text-2); background:var(--bg-raised); border:1px solid rgba(160,144,120,0.18); }
+.venue-chip.strong { color:var(--text-1); background:rgba(196,151,58,0.07); border:1px solid rgba(196,151,58,0.22); }
+
+.conv-q {
+  font-size:13px; color:var(--text-2); line-height:1.7;
+  background:var(--bg-raised); border-left:2px solid var(--gold-dim);
+  border-radius:0 8px 8px 0; padding:12px 14px; font-style:italic;
+}
+.sheet-bottom-space { height:30px; }
+
+/* Brand card photo placeholder — category banner gradient */
+.bc-photo-s3 {
+  width:100%; aspect-ratio:16/9; border-radius:6px; overflow:hidden; position:relative;
+  display:flex; align-items:center; justify-content:center;
+}
+.bc-photo-s3-name {
+  font-family:'Playfair Display',serif; font-size:11px; font-weight:600;
+  color:var(--bc-photo-text,rgba(196,151,58,0.22)); text-align:center; padding:0 8px;
+  position:relative; z-index:1;
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME -->
+  <div class="screen active" id="sc-home">
+    <div class="home-wrap">
+      <div class="hero">
+        <div class="hero-content">
+          <div class="eyebrow">Internal Sales Reference</div>
+          <div class="hero-name">Moco Meats</div>
+          <div class="hero-sub">Brand &amp; Product Guide</div>
+          <div class="hero-rule"></div>
+          <div class="hero-prompt">Select a species to begin</div>
+        </div>
+      </div>
+      <div class="species-grid" id="species-grid"></div>
+      <div class="home-footer"><p>Moco Food Services &nbsp;&middot;&nbsp; Internal Use Only &nbsp;&middot;&nbsp; 2026</p></div>
+    </div>
+  </div>
+
+  <!-- CATEGORIES (Beef only) -->
+  <div class="screen" id="sc-cats">
+    <div class="topbar" id="cats-topbar">
+      <button class="back-btn" data-action="back">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11.5L4.5 7 9 2.5"/></svg>
+        Back
+      </button>
+    </div>
+    <div class="bc-bar" id="cats-bc"></div>
+    <div class="section-hero" id="cats-hero"></div>
+    <div class="s-content">
+      <div class="s-meta" id="cats-meta"></div>
+      <div class="cat-list" id="cat-list"></div>
+    </div>
+  </div>
+
+  <!-- BRANDS -->
+  <div class="screen" id="sc-brands">
+    <div class="topbar" id="brands-topbar">
+      <button class="back-btn" data-action="back">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11.5L4.5 7 9 2.5"/></svg>
+        Back
+      </button>
+    </div>
+    <div class="bc-bar" id="brands-bc"></div>
+    <div class="section-hero" id="brands-hero"></div>
+    <div class="s-content" id="brands-content"></div>
+  </div>
+
+
+</div>
+
+<div id="sheet-overlay"></div>
+<div id="brand-sheet">
+  <div id="sheet-handle"></div>
+  <div id="sheet-inner"></div>
+</div>
+
+<script>
+/* ── ICONS ── */
+const ICONS = {
+  beef: `<svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="30" cy="35" rx="17" ry="14"/>
+    <path d="M15 26C10 18 10 9 16 8C17 14 17 22 18 25"/>
+    <path d="M45 26C50 18 50 9 44 8C43 14 43 22 42 25"/>
+    <ellipse cx="9" cy="32" rx="3.5" ry="5" transform="rotate(-12 9 32)"/>
+    <ellipse cx="51" cy="32" rx="3.5" ry="5" transform="rotate(12 51 32)"/>
+    <ellipse cx="30" cy="43" rx="8.5" ry="5"/>
+    <circle cx="26.5" cy="43" r="1.6" fill="currentColor" stroke="none"/>
+    <circle cx="33.5" cy="43" r="1.6" fill="currentColor" stroke="none"/>
+    <circle cx="22" cy="31" r="2" fill="currentColor" stroke="none"/>
+    <circle cx="38" cy="31" r="2" fill="currentColor" stroke="none"/>
+  </svg>`,
+  lamb: `<svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 30C14 20 21 13 30 13C39 13 46 20 46 30C46 40 39 47 30 47C21 47 14 40 14 30Z"/>
+    <path d="M21 15C19 9 23 6 25 10"/>
+    <path d="M30 13C30 7 35 5 34 10"/>
+    <path d="M39 15C41 9 45 11 43 15"/>
+    <path d="M13 31C7 29 6 36 11 37"/>
+    <path d="M47 31C53 29 54 36 49 37"/>
+    <ellipse cx="30" cy="42" rx="7" ry="4"/>
+    <circle cx="23" cy="31" r="1.8" fill="currentColor" stroke="none"/>
+    <circle cx="37" cy="31" r="1.8" fill="currentColor" stroke="none"/>
+  </svg>`,
+  pork: `<svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="30" cy="33" r="18"/>
+    <path d="M18 18C16 10 21 7 23 12C21 14 19 16 18 18"/>
+    <path d="M42 18C44 10 39 7 37 12C39 14 41 16 42 18"/>
+    <circle cx="30" cy="41" r="8.5"/>
+    <circle cx="26.5" cy="41" r="2" fill="currentColor" stroke="none"/>
+    <circle cx="33.5" cy="41" r="2" fill="currentColor" stroke="none"/>
+    <circle cx="22" cy="27" r="2.2" fill="currentColor" stroke="none"/>
+    <circle cx="38" cy="27" r="2.2" fill="currentColor" stroke="none"/>
+  </svg>`,
+  chicken: `<svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="28" cy="34" r="17"/>
+    <path d="M20 19C18 12 23 9 24 14"/>
+    <path d="M28 17C28 10 33 8 32 13"/>
+    <path d="M35 19C37 12 42 13 40 17"/>
+    <path d="M45 33L53 29L51 36L55 38L46 38"/>
+    <path d="M20 50C18 56 14 56 14 50"/>
+    <path d="M30 50C28 56 24 56 24 50"/>
+    <circle cx="36" cy="29" r="2.5" fill="currentColor" stroke="none"/>
+  </svg>`
+};
+
+function brandSlug(name) {
+  return name.toLowerCase().replace(/['']/g, '').replace(/\s+/g, '-');
+}
+
+/* ── CATEGORY THEME MAP ──
+   Each category id maps to CSS custom property values
+   applied to the active screen for topbar tint + hero glow + card colours */
+const CAT_THEMES = {
+  'wagyu':       { tint:'rgba(80,15,5,0.28)',   glow:'rgba(139,42,18,0.22)',  spBgA:'#1A0A06', spBgB:'#1A1210', spBorder:'rgba(196,151,58,0.28)', prBg:'#18100C', prBorder:'rgba(139,42,18,0.25)', cardGlow:'rgba(100,20,5,0.12)',
+    sheetBg:'#100806', sheetBorder:'rgba(139,42,18,0.25)', bannerBg:'linear-gradient(140deg,#2A0A04 0%,#14080A 100%)', bannerText:'rgba(196,151,58,0.20)' },
+  'grain':       { tint:'rgba(80,55,5,0.25)',   glow:'rgba(139,96,24,0.20)',  spBgA:'#1A1006', spBgB:'#1A1610', spBorder:'rgba(196,151,58,0.26)', prBg:'#181408', prBorder:'rgba(139,96,24,0.22)', cardGlow:'rgba(100,70,5,0.10)',
+    sheetBg:'#100E06', sheetBorder:'rgba(139,96,24,0.22)', bannerBg:'linear-gradient(140deg,#241A04 0%,#12100A 100%)', bannerText:'rgba(196,151,58,0.18)' },
+  'grass':       { tint:'rgba(10,40,10,0.28)',  glow:'rgba(42,92,34,0.22)',   spBgA:'#091408', spBgB:'#101A10', spBorder:'rgba(42,92,34,0.35)',   prBg:'#0E1A0C', prBorder:'rgba(42,92,34,0.28)', cardGlow:'rgba(10,60,10,0.10)',
+    sheetBg:'#080E08', sheetBorder:'rgba(42,92,34,0.30)', bannerBg:'linear-gradient(140deg,#0A2008 0%,#081008 100%)', bannerText:'rgba(42,92,34,0.50)' },
+  'moco-beef':   { tint:'rgba(5,10,40,0.32)',   glow:'rgba(26,58,139,0.22)',  spBgA:'#080C1A', spBgB:'#101420', spBorder:'rgba(100,130,200,0.28)',prBg:'#0C1020', prBorder:'rgba(100,130,200,0.20)', cardGlow:'rgba(5,10,80,0.12)',
+    sheetBg:'#080A14', sheetBorder:'rgba(100,130,200,0.22)', bannerBg:'linear-gradient(140deg,#0A1030 0%,#080C18 100%)', bannerText:'rgba(100,130,200,0.35)' },
+  'all-lamb':    { tint:'rgba(60,20,5,0.25)',   glow:'rgba(122,58,24,0.20)',  spBgA:'#1A0C06', spBgB:'#1A1410', spBorder:'rgba(180,120,80,0.28)', prBg:'#18100A', prBorder:'rgba(122,58,24,0.25)', cardGlow:'rgba(80,30,5,0.10)',
+    sheetBg:'#100A06', sheetBorder:'rgba(122,58,24,0.25)', bannerBg:'linear-gradient(140deg,#201008 0%,#10080A 100%)', bannerText:'rgba(180,120,80,0.25)' },
+  'all-pork':    { tint:'rgba(50,5,40,0.25)',   glow:'rgba(106,34,88,0.18)',  spBgA:'#180610', spBgB:'#1A0E18', spBorder:'rgba(180,100,160,0.26)',prBg:'#160812', prBorder:'rgba(106,34,88,0.22)', cardGlow:'rgba(60,5,50,0.10)',
+    sheetBg:'#0E0610', sheetBorder:'rgba(106,34,88,0.25)', bannerBg:'linear-gradient(140deg,#1E0618 0%,#0E0610 100%)', bannerText:'rgba(180,100,160,0.25)' },
+  'moco-chicken':{ tint:'rgba(5,30,8,0.30)',    glow:'rgba(26,58,28,0.22)',   spBgA:'#061208', spBgB:'#0E1A10', spBorder:'rgba(43,107,53,0.35)', prBg:'#0C1A0E', prBorder:'rgba(43,107,53,0.28)', cardGlow:'rgba(5,50,10,0.12)',
+    sheetBg:'#060E08', sheetBorder:'rgba(43,107,53,0.28)', bannerBg:'linear-gradient(140deg,#082010 0%,#061008 100%)', bannerText:'rgba(43,107,53,0.50)' },
+};
+
+/* Apply category theme to a screen's topbar and hero */
+function applyTheme(catId, screenId) {
+  const theme = CAT_THEMES[catId];
+  if (!theme) return;
+  const topbar = document.getElementById(screenId + '-topbar');
+  const hero   = document.getElementById(screenId + '-hero');
+  if (topbar) {
+    topbar.style.setProperty('--cat-tint', theme.tint);
+  }
+  if (hero) {
+    hero.style.setProperty('--cat-glow', theme.glow);
+  }
+  // Set brand card colour vars on brands screen
+  if (screenId === 'brands') {
+    const content = document.getElementById('brands-content');
+    if (content) {
+      content.style.setProperty('--sp-card-bg-a',  theme.spBgA);
+      content.style.setProperty('--sp-card-bg-b',  theme.spBgB);
+      content.style.setProperty('--sp-card-border', theme.spBorder);
+      content.style.setProperty('--pr-card-bg',    theme.prBg);
+      content.style.setProperty('--pr-card-border', theme.prBorder);
+    }
+  }
+}
+
+/* ── BRANDS (Stage 3 detail content) ── */
+const BRANDS = {
+  'Muse': { producer:"Paradigm Foods · Tasmania", catId:'wagyu', tier:'Super Premium',
+    quick:"Full Blood Australian Wagyu, MB 9+, 450-day grain fed on Tasmanian pastures. MSA graded for guaranteed tenderness. No added hormones or antibiotics. Halal certified. The highest marbling in the Moco portfolio.",
+    specs:['Full Blood','MB 9+','450-day Grain Fed','Tasmania','MSA Graded','No Added Hormones','Halal','Paradigm Foods'],
+    provenance:"Muse is Full Blood Australian Wagyu, grain fed for 450 days on lush, fertile ranges throughout Tasmania. Raised on pastures free from added hormones and antibiotics, every animal is MSA graded — ensuring guaranteed tenderness and quality on every cut. With a marble score of MB 9+, Muse delivers the deeply flavoursome, juicy and tender eating experience that Australian Full Blood Wagyu is renowned for.",
+    venues:[{name:'Fine Dining',strong:true},{name:'Premium Steakhouse',strong:true},{name:'Premium Pub',strong:true},{name:'Hotel Dining',strong:false}],
+    sellingPoints:["Full Blood Wagyu, MB 9+ — the highest marbling in the portfolio, period","450-day grain fed on Tasmanian pastures — longer feeding program, richer fat development","MSA graded — guaranteed tenderness backed by an independent standard, not just a marble score","No added hormones or antibiotics — clean story for venues that put provenance on the menu","Halal certified — no restrictions for any customer"],
+    conversation:"What Wagyu are you running at the moment? If your customers are serious about steak, Muse is worth a look — Full Blood, MB 9+, 450-day grain fed in Tasmania, MSA graded for tenderness. It's the top of our range and it sells itself on the plate." },
+
+  'Sir Harry': { producer:"Elbow Valley Beef · Southern Downs QLD", catId:'wagyu', tier:'Super Premium',
+    quick:"Fullblood and F1–F4 Purebred Wagyu from Elbow Valley, Southern Downs QLD. Named after General Sir Harry Chauvel. Unique orange pulp-enriched grain diet — raises Vitamin E and natural antioxidants, creating a sweeter fat profile. MB 4–9+. Halal certified.",
+    specs:['Fullblood & F1–F4 Purebred','MB 4–9+','Orange Pulp Fed','Southern Downs QLD','Elevated Vitamin E','Halal'],
+    provenance:"Sir Harry is named after General Sir Harry Chauvel — WWI Light Horse commander and Australian military hero. Cattle are fed a specialised diet enriched with orange citrus pulp, wheat, barley and corn — the citrus pulp uniquely raises Vitamin E levels and natural antioxidants, creating a noticeably sweeter fat profile and lower fat oxidation. Fullblood and F1–F4 purebred genetics from the Southern Downs, delivering consistent quality across the range. A genuine point of difference built on innovation and sustainability.",
+    venues:[{name:'Premium Restaurant',strong:true},{name:'Fine Dining',strong:true},{name:'Premium Pub',strong:true},{name:'Hotel Dining',strong:false}],
+    sellingPoints:["Orange pulp-enriched grain diet — uniquely raises Vitamin E and natural antioxidants, creating a sweeter fat profile you can taste","MB 4–9+ from a QLD producer — premium marbling with a genuine local provenance story","Fullblood and F1–F4 purebred genetics — consistent quality across the supply","Named after General Sir Harry Chauvel — Australian WWI heritage story that works on a menu","Halal certified — no restrictions for any customer"],
+    conversation:"Sir Harry offers a genuine point of difference with its citrus-fed program — it's not a gimmick, it raises Vitamin E and antioxidants and you get a noticeably sweeter fat profile. The focus on innovation and sustainability is built into how they farm, not just how they market. MB 4–9+, QLD grown, and the name has a story behind it. Chefs and venues that try it don't go back." },
+
+  'Senku': { producer:"Paradigm Foods · Eastern Australia", catId:'wagyu', tier:'Super Premium',
+    quick:"F1–F3 Wagyu from cattle bred over 30 years for excellence. Named after the Australian pioneers who introduced Wagyu in the 1980s. 450+ day grain fed. MB 6–9+. Suits upscale steakhouse, Japanese and Korean-inspired concepts. Halal certified.",
+    specs:['F1–F3 Wagyu','450+ day grain fed','MB 6–9+','Eastern Australia','Paradigm Foods','Halal'],
+    provenance:"Senku is named after the breeders who brought Wagyu to Australia more than 30 years ago — a pioneer heritage story with genuine depth. F1–F3 Wagyu cattle grain fed for over 450 days, ensuring intense marbling with a marble score of MB 6–9+. Sourced from cattle bred over 30 years for excellence, delivering a juicy, melt-in-your-mouth flavour ideal for grilling, pan-searing or Korean BBQ. A favourite for Japanese yakiniku, Korean galbi and upscale steakhouse menus. Distributed by Paradigm Foods.",
+    venues:[{name:'Premium Restaurant',strong:true},{name:'Fine Dining',strong:true},{name:'Japanese / Korean Concept',strong:true},{name:'Upscale Steakhouse',strong:false}],
+    sellingPoints:["Named after the pioneers who introduced Wagyu to Australia over 30 years ago — a heritage story with genuine depth","450+ day grain fed — one of the longest feeding programs in the portfolio, driving intense marbling and flavour","MB 6–9+ across the range — consistent high marbling at a step below Full Blood price","Versatile for upscale menus — suits steakhouse, Japanese and Korean-inspired concepts equally","Halal certified — no restrictions for any customer"],
+    conversation:"Senku is named after the breeders who brought Wagyu to Australia more than 30 years ago — it's a genuine pioneer story. F1–F3, 450+ day grain fed, MB 6–9+. Strong eating quality, strong menu story, and it sits at a more accessible price point than Full Blood. Good fit for any venue taking Wagyu seriously." },
+
+  'Jacks Creek Pure Bred': { producer:"Jack's Creek · Breeza, Northern NSW", catId:'wagyu', tier:'Premium',
+    quick:"Purebred Wagyu from Tajima Wagyu sires, 500+ day grain fed, MB 8–9. Third-generation Warmoll family, Breeza Northern NSW. World Steak Challenge award winner. HGP free, Halal, EU accredited. Exported to 30+ countries.",
+    specs:['Purebred Wagyu','Tajima Sires','500+ day grain fed','MB 8–9','Northern NSW','HGP Free','Halal','EU Accredited'],
+    provenance:"The Warmoll family has farmed at Breeza in Northern NSW for generations. Purebred Wagyu derived from Tajima Wagyu sires, grain fed for 500+ days for consistent MB 8–9 marbling. Jack's Creek has won awards at the World Steak Challenge because it delivers the finest Wagyu from the same Japanese bloodline behind the world's finest Wagyu programs. HGP free, Halal certified and EU accredited — no restrictions on any market or customer. Exported to 30+ countries.",
+    venues:[{name:'Fine Dining',strong:true},{name:'Premium Steakhouse',strong:true},{name:'Hotel Dining',strong:false},{name:'Functions',strong:false}],
+    sellingPoints:["World Steak Challenge award winner — the most internationally recognised beef in the portfolio","Tajima Wagyu genetics — the same Japanese bloodline behind the world's finest Wagyu programs","500+ day grain fed — exceptional commitment to feeding program, delivering consistent MB 8–9","Northern NSW provenance — locally relevant story for the territory","Halal certified — no restrictions for any customer"],
+    conversation:"Jack's Creek Pure Bred has won at the World Steak Challenge — it's internationally recognised as among the finest Wagyu produced in Australia. Purebred from Tajima sires, 500+ day grain fed, MB 8–9. For a steakhouse or fine dining venue that wants a Wagyu with genuine credentials, the story sells itself." },
+
+  'Icon XB': { producer:"Paradigm Foods · Eastern Australia", catId:'wagyu', tier:'Mid-Range',
+    quick:"F1–F3 Wagyu, 365-day grain fed, MB 4–9 (typically grades MB 6). MSA graded. Grand Champion 2023 Royal Queensland Show. Exclusive limited supply. Strong mid-range Wagyu at an accessible price point.",
+    specs:['F1–F3 Wagyu','365-day grain fed','MB 4–9','Typically MB 6','MSA Graded','Limited supply'],
+    provenance:"Icon XB is a premium F1–F3 Wagyu, grain fed for 365 days to deliver consistent marbling across a range of MB 4–9, typically grading MB 6. MSA graded for guaranteed tenderness and quality. Grand Champion and four gold medals at the 2023 Royal Queensland Show. Exclusive and limited supply — a genuine premium product, not a commodity Wagyu. Strong eating quality at a mid-range price point, ideal for venues wanting real Wagyu on the menu without the Full Blood price tag.",
+    venues:[{name:'Premium Restaurant',strong:true},{name:'Gastro Pub',strong:true},{name:'Fine Dining',strong:false},{name:'Hotel Dining',strong:false}],
+    sellingPoints:["MB 4–9 range available — typically grades MB 6, giving venues genuine Wagyu quality at a mid-range price point","365-day grain fed — a serious feeding program for a crossbred, driving consistent marbling and flavour","MSA graded — independent tenderness guarantee, not just a marble score","Grand Champion 2023 Royal Queensland Show — strong local credential for SEQ conversations"],
+    conversation:"Icon XB is a strong mid-range Wagyu — F1–F3, 365-day grain fed, typically grades MB 6 with a range up to MB 9. MSA graded so the eating quality is consistent every time. Good fit for venues that want real Wagyu on the menu without the Full Blood price tag." },
+
+  'Black Opal': { producer:"Harmony Agriculture & Food Company · Victoria / Tasmania", catId:'wagyu', tier:'Mid-Range',
+    quick:"F1–F3 Wagyu × Angus cross, 380-day grain fed, MB 8–9, no added hormones. Our entry point into the Wagyu range. Backed by one of the world's largest Wagyu exporters. Consistent supply, consistent spec.",
+    specs:['F1–F3 Wagyu × Angus','380-day grain fed','MB 8–9','No Added Hormones','Global export'],
+    provenance:"Black Opal is named after the iconic Australian gemstone. F1–F3 Wagyu × Angus cross, grain fed for 380 days with no added hormones, achieving MB 8–9. Backed by one of the world's largest Wagyu exporters by volume — supply reliability at scale. Our entry point into the Wagyu range, suitable for restaurants, pubs, clubs and steakhouses. Consistent marbling ensures an indulgent, juicy result every time.",
+    venues:[{name:'Restaurant',strong:true},{name:'Pub',strong:true},{name:'Club',strong:true},{name:'Premium Steakhouse',strong:false}],
+    sellingPoints:["MB 8–9 at a crossbred price point — exceptional marbling for the tier, strong value proposition","380-day grain fed, no added hormones — longer program than most F1 products, clean credentials","F1–F3 Wagyu × Angus cross — consistent marbling and eating quality across the range","Suits restaurants, pubs, clubs and steakhouses — versatile across venue types and menu price points","Backed by one of the world's largest Wagyu exporters — supply reliability at scale"],
+    conversation:"If you've been thinking about adding Wagyu to the menu but haven't taken the step yet, Black Opal is the place to start. F1–F3, 380-day grain fed, MB 8–9 — real Wagyu eating quality without the Full Blood price tag. It's our entry point into the Wagyu range and it's an easy sell to customers once they try it." },
+
+  'Jacks Creek Cross Bred': { producer:"Jack's Creek · Breeza, Northern NSW", catId:'wagyu', tier:'Entry Level',
+    quick:"F1–F3 Wagyu × Black Angus from Tajima sires, 400+ day grain fed, MB 4–9. 100% Australian, Northern NSW. Same Warmoll family World Steak Challenge pedigree as Pure Bred. HGP free, Halal, EU accredited. Complements Black Opal across different cut types.",
+    specs:['F1–F3 Wagyu × Black Angus','Tajima Sires','400+ day grain fed','MB 4–9','Northern NSW','100% Australian','HGP Free','Halal'],
+    provenance:"Jack's Creek Cross Bred comes from the same Warmoll family and the same Tajima sire bloodlines as the World Steak Challenge winning Pure Bred. F1–F3 Wagyu crossed with Black Angus, grain fed for 400+ days, achieving MB 4–9. 100% Australian, Northern NSW. HGP free, Halal and EU accredited. Carried alongside Black Opal to cover all cut types in the Wagyu range.",
+    venues:[{name:'Pub',strong:true},{name:'Club',strong:true},{name:'Restaurant — Mid Tier',strong:false},{name:'Casual Dining',strong:false}],
+    sellingPoints:["Same World Steak Challenge pedigree as Pure Bred — same Warmoll family, same Tajima sire bloodlines, same Northern NSW supply chain","MB 4–9 at a crossbred price point — outstanding marbling for the tier","400+ day grain fed — serious feeding program delivering consistent eating quality","F1–F3 Wagyu × Black Angus cross — complements Black Opal across different cut types","100% Australian, Halal certified — clean credentials, no supply restrictions"],
+    conversation:"Jack's Creek Cross Bred comes from the same family and the same Tajima sire bloodlines as their World Steak Challenge winning Pure Bred. F1–F3, 400+ day grain fed, MB 4–9 — serious Wagyu quality at a crossbred price. We carry it alongside Black Opal to make sure we can cover every cut type you need in the Wagyu range." },
+
+  'The Bachelor': { producer:"JBS Australia · Beef City EST 170, Darling Downs QLD", catId:'grain', tier:'Super Premium',
+    quick:"MSA graded Black Angus, MB 3+, 120-day grain fed at Beef City EST 170, Darling Downs QLD. Named after William McCombie — father of the modern Angus breed. No added hormones or antibiotics. Produced under strict food safety and animal welfare standards. Our go-to for high end pubs, clubs and entry point for fine dining.",
+    specs:['Black Angus','MSA Graded','MB 3+','120-day grain fed','Beef City EST 170','Darling Downs QLD','No Added Hormones'],
+    provenance:"The Bachelor is named after William McCombie — father of the modern Angus breed. MSA graded Black Angus, MB 3+, 120-day grain fed at Beef City EST 170 on the Darling Downs. Produced under strict food safety and animal welfare standards, no added hormones or antibiotics. A consistent, trusted premium Angus for high end pubs, clubs and a natural entry point for fine dining and premium restaurant venues building out their beef range.",
+    venues:[{name:'Premium Pub',strong:true},{name:'Club',strong:true},{name:'Fine Dining — Entry',strong:true},{name:'Premium Restaurant',strong:false}],
+    sellingPoints:["MSA graded Black Angus MB 3+ — independent eating quality guarantee, not just a marble score","Named after William McCombie — father of the modern Angus breed, a heritage story that works on a premium menu","120-day grain fed at Beef City, Darling Downs — QLD provenance, consistent spec","Produced under strict food safety and animal welfare standards — confidence for venues that care about what they serve","The sweet spot between premium pub and fine dining — versatile enough for both without being priced out of either"],
+    conversation:"The Bachelor is our go-to for high end pubs and clubs, and it's also the entry point we use with fine dining venues that are building out their beef range. MSA graded Black Angus, MB 3+, 120-day grain fed on the Darling Downs. Named after the man who built the modern Angus breed — there's a story there if the venue wants to use it." },
+
+  'Pure Prime': { producer:"JBS Australia · Riverina / Beef City / Dinmore", catId:'grain', tier:'Super Premium',
+    quick:"Grain fed, MB 4, no added hormones or antibiotics, 100% traceable. 20+ years in market. Our premium grain fed option — the go-to for high end pubs and clubs as a feature steak, and a strong fit for all premium venue types. Super consistent eating quality.",
+    specs:['Grain Fed','MB 4','No Added Hormones','No Antibiotics','100% Traceable','20+ years in market'],
+    provenance:"Pure Prime is JBS's premium grain fed offering — MB 4, no added hormones or antibiotics, 100% traceable Australian beef. Over 20 years in the market for good reason. Naturally grain-fed cattle raised on lush pastures, producing exceptional juiciness and depth of flavour. Trusted by chefs across restaurants, pubs, clubs and commercial kitchens. The premium grain fed option for venues that want consistent, proven eating quality without Wagyu pricing.",
+    venues:[{name:'Premium Pub',strong:true},{name:'Club',strong:true},{name:'Fine Dining',strong:true},{name:'Premium Restaurant',strong:false}],
+    sellingPoints:["MB 4 grain fed — premium marbling without the Wagyu price tag, super consistent eating quality every order","No added hormones or antibiotics — clean label credentials for venues that put provenance on the menu","100% traceable Australian beef — confidence for operators and their customers","20+ years in the market — a proven, trusted brand with chefs and operators across the country","Works across venue types — the go-to premium grain fed for pubs, clubs, restaurants and fine dining alike"],
+    conversation:"Pure Prime is our premium grain fed option — MB 4, no added hormones, 100% traceable, and 20 years in the market for good reason. For pubs and clubs it's a natural special or feature steak. For restaurants it sits in that sweet spot between everyday grain fed and Wagyu. The eating quality is super consistent, which is what busy kitchens need." },
+
+  'Ebony Black Angus': { producer:"Kilcoy Global Foods · Southern Australia", catId:'grain', tier:'Premium',
+    quick:"Black Angus, MB 2+, 150-day grain fed. Sourced from high-quality Black Angus cattle raised on lush pastures of Southern Australia. Our entry point into the Black Angus range — verified breed spec with a 150-day grain fed program at an accessible price.",
+    specs:['Black Angus','MB 2+','150-day grain fed','Southern Australia'],
+    provenance:"Ebony Black Angus is sourced from high-quality Black Angus cattle raised on the lush pastures of Southern Australia, grain fed for 150 days to deliver guaranteed MB 2+ marbling, exceptional tenderness, rich beef flavour and consistent quality trusted by professional kitchens. Our entry point into the Black Angus range — verified breed spec at an accessible price point. Produced by Kilcoy Global Foods.",
+    venues:[{name:'Restaurant',strong:true},{name:'Pub',strong:true},{name:'Steakhouse',strong:false},{name:'Catering',strong:false}],
+    sellingPoints:["Entry point into our Black Angus range — verified Black Angus spec with a 150-day grain fed program at an accessible price","MB 2+ — consistent marbling delivering reliable tenderness, juiciness and flavour","150-day grain fed — longer feeding program than standard entry level options, noticeable difference on the plate","Suits restaurants, pubs, steakhouses and catering — versatile across venue types and menu price points","Southern Australia sourcing — consistent year-round production"],
+    conversation:"If you're looking to put a proper Black Angus on the menu without jumping straight to the top of the range, Ebony is the place to start. MB 2+, 150-day grain fed, verified Black Angus spec. It's our entry point into the Angus range and it punches above its price point." },
+
+  'Jacks Creek Black Angus': { producer:"Jack's Creek · Breeza, Northern NSW", catId:'grain', tier:'Premium',
+    quick:"100% independently verified pure Black Angus. No added hormones or antibiotics. 130-day grain fed, MB 2+. Northern NSW. Same Warmoll family behind the World Steak Challenge winners. A serious mid-tier Angus that holds its own against anything at that price point.",
+    specs:['100% Verified Pure Black Angus','130-day grain fed','MB 2+','Northern NSW','No Added Hormones','No Antibiotics','Halal'],
+    provenance:"Jack's Creek Angus Beef is derived from superior Angus cattle, bred from the best bloodlines and independently verified as being 100% Black Angus. No added hormones or antibiotics. 130-day grain fed, MB 2+, Northern NSW. The same Warmoll family operation behind the World Steak Challenge winning Wagyu. A serious mid-tier Angus contender — the natural step up from Ebony in the Angus range.",
+    venues:[{name:'Restaurant',strong:true},{name:'Premium Pub',strong:true},{name:'Gastro Pub',strong:false},{name:'Club — Steak Feature',strong:false}],
+    sellingPoints:["100% independently verified pure Black Angus — not just a breed claim, the genetics are confirmed","No added hormones or antibiotics — clean credentials that resonate with quality-focused operators","130-day grain fed, MB 2+ — a serious mid-tier Angus that punches well above entry level","Northern NSW provenance — locally relevant story for the territory","Same Warmoll family behind the World Steak Challenge winners — credibility flows across the whole Jack's Creek range"],
+    conversation:"Jack's Creek Black Angus is 100% independently verified pure breed — not just a marketing claim. No added hormones, 130-day grain fed, MB 2+. Same Warmoll family farm behind the World Steak Challenge winners. It's a serious mid-tier Angus that holds its own against anything in the market at that price point." },
+
+  'Riverina Black Angus': { producer:"JBS Australia · Riverina EST 517, South-West NSW", catId:'grain', tier:'Premium',
+    quick:"Our most popular and sought-after Angus. MSA certified Black Angus, MB 2+, 120-day grain fed. Sourced from the rich pastoral lands of the Riverina, South-West NSW. Halal certified. Trusted by venues across every customer type in the territory.",
+    specs:['Black Angus','MSA Certified','MB 2+','120-day grain fed','Riverina South-West NSW','Halal'],
+    provenance:"Riverina Black Angus is cut from some of the finest cattle in Australia, raised on the rich lands of the Riverina for a premium cut of beef with plenty of natural flavour. Black Angus cattle known for their superior meat quality, 120-day grain fed to produce a consistent marble score of MB 2+. MSA certified — raised to independent standards that ensure guaranteed tenderness. Halal certified. Our best-selling Angus for a reason — it works for pubs, clubs, restaurants and fine dining alike.",
+    venues:[{name:'All Venue Types',strong:true},{name:'Pub',strong:true},{name:'Club',strong:true},{name:'Fine Dining',strong:false}],
+    sellingPoints:["Our most popular and sought-after Angus — trusted by venues across every customer type in the territory","MSA certified — independent guaranteed tenderness, consistent eating quality every single order","Black Angus from the rich pastoral lands of the Riverina — a provenance story that resonates with operators and their customers","120-day grain fed, MB 2+ — reliable spec, predictable kitchen performance","Halal certified — no restrictions for any customer"],
+    conversation:"Riverina Black Angus is our best-selling Angus for a reason — MSA certified, 120-day grain fed, MB 2+, sourced from the Riverina in South-West NSW. It works for pubs, clubs, restaurants and fine dining alike. If you're only going to run one Black Angus, this is the one." },
+
+  'Yardstick': { producer:"JBS Australia · Darling Downs QLD", catId:'grain', tier:'Premium',
+    quick:"British Cross, MB 2+, 100-day grain fed, Darling Downs QLD. Halal certified. 40+ years in market. Our entry point into marbled grain fed beef — the first step up from commodity beef. Reliable, consistent, well priced.",
+    specs:['British Cross','MB 2+','100-day grain fed','Darling Downs QLD','Halal','40+ years'],
+    provenance:"Yardstick is sourced from British Cross breeds from the Darling Downs, 100-day grain fed to deliver consistent MB 2+ marbling. A great balance between quality and value — reliable eating quality for any venue. 40+ years in the market — one of the most established and trusted grain fed brands in Australia. The entry point into marbled grain fed beef in the Moco portfolio. Halal certified.",
+    venues:[{name:'Pub',strong:true},{name:'Club',strong:true},{name:'Casual Dining',strong:false},{name:'Restaurant — Volume',strong:false}],
+    sellingPoints:["Entry point into marbled grain fed beef — the first step up from commodity beef with genuine marbling","British Cross breeds from the Darling Downs — reliable genetics, consistent eating quality","MB 2+, 100-day grain fed — genuine marbling at an accessible price point","Halal certified — no restrictions for any customer","40+ years in the market — one of the most established and trusted grain fed brands in Australia"],
+    conversation:"If a venue wants to step up from commodity beef and put a proper marbled grain fed on the menu, Yardstick is the entry point. British Cross, Darling Downs, MB 2+, 100-day grain fed. 40 years in the market and still one of the best value options in the range." },
+
+  'Kilcoy Black Diamond': { producer:"Kilcoy Global Foods · Kilcoy, SEQ", catId:'grain', tier:'Premium',
+    quick:"Grain fed, MB 2+, min 100-day, MSA graded, Halal. Kilcoy Global Foods, Kilcoy SEQ, since 1953. Kilcoy helped found AUS-MEAT. Exported to 50+ countries. Reliable, consistent food service workhorse with genuine heritage and global credibility.",
+    specs:['Grain Fed','MB 2+','Min 100-day','MSA Graded','Halal','Since 1953','50+ countries'],
+    provenance:"Kilcoy Global Foods has been processing beef at Kilcoy in the SEQ hinterland since 1953. Under Ian Kennedy's leadership in the 1960s, Kilcoy achieved two industry firsts — the first consignment of chilled beef to Japan, and founding AUS-MEAT, the national industry standard for meat production and processing. Black Diamond is Kilcoy's premium grain fed offering — MB 2+, 100-day grain fed and MSA graded. Exported to over 50 countries. A reliable workhorse that performs consistently for busy food service kitchens.",
+    venues:[{name:'Pub',strong:true},{name:'Club',strong:true},{name:'Restaurant — Volume',strong:true},{name:'Casual Dining',strong:false}],
+    sellingPoints:["MSA graded, MB 2+, 100-day grain fed — solid all-round spec at a mid-range price point with independent eating quality guarantee","Since 1953 — one of the most established grain fed brands in Australia, Kilcoy helped found AUS-MEAT","Exported to 50+ countries — global demand reflecting real quality standards","SEQ locally processed — a genuinely local story for Brisbane, Gold Coast, Sunshine Coast and Darling Downs customers"],
+    conversation:"Do you know the Kilcoy story? They helped create the AUS-MEAT standards that the whole industry runs on — and Black Diamond is their MSA-graded premium grain fed. Local to SEQ, exported globally, in the market since 1953." },
+
+  'Beef City Platinum': { producer:"JBS Australia · Beef City EST 170, Darling Downs QLD", catId:'grain', tier:'Mid-Range',
+    quick:"British Cross (Angus & Hereford), MB 0–1+, 100-day grain fed, MSA graded. Beef City EST 170, Darling Downs QLD. Halal certified. The backbone of our 100-day grain fed range — the classic QLD pub steak. Same operation as Beef City Black, but MSA graded.",
+    specs:['British Cross (Angus & Hereford)','MB 0–1+','100-day grain fed','MSA Graded','Beef City EST 170','Darling Downs QLD','Halal'],
+    provenance:"Beef City Platinum is produced from British Cross (Angus and Hereford) cattle from the Darling Downs, 100-day grain fed to the highest standards. MSA graded for guaranteed tenderness — the key differentiator over Beef City Black. The backbone of our 100-day grain fed range. The classic QLD pub steak — reliable, consistent, and priced right for busy bistro and casual dining menus. Beef City EST 170, Darling Downs. Halal certified.",
+    venues:[{name:'Pub',strong:true},{name:'Club',strong:true},{name:'Bistro',strong:true},{name:'Casual Dining',strong:false}],
+    sellingPoints:["The backbone of our 100-day grain fed range — reliable, consistent, trusted by QLD venues of all types","MSA graded — independent guaranteed tenderness, the key differentiator at this price point","British Cross (Angus & Hereford) from the Darling Downs — classic QLD beef with proven eating quality","100-day grain fed, MB 0–1+ — consistent spec that performs in a busy kitchen every time","Halal certified — no restrictions for any customer"],
+    conversation:"Beef City Platinum is the classic QLD pub steak — British Cross from the Darling Downs, 100-day grain fed, MSA graded for guaranteed tenderness. It's the backbone of our grain fed range and it's what we'd put on a busy bistro menu without hesitation. Consistent, reliable and priced right." },
+
+  'Royal': { producer:"JBS Australia · Maranoa District QLD", catId:'grain', tier:'Mid-Range',
+    quick:"British Cross (Angus & Hereford), MB 0–1+, 100-day grain fed, YG/YP cattle. Maranoa District QLD. Halal certified. Ideal for chef portioning — consistent primal size, thicker steaks, great face steak. Good entry level grain fed that works hard in the kitchen.",
+    specs:['British Cross (Angus & Hereford)','MB 0–1+','100-day grain fed','YG/YP Cattle','Maranoa District QLD','Halal'],
+    provenance:"Royal is sourced from British Cross (Angus and Hereford) cattle from the Maranoa District in QLD, 100-day grain fed, MB 0–1+. YG/YP cattle — younger animals delivering consistent primal sizes and a great face steak for portioning. Ideal for chefs who prefer to do their own portioning — the consistent primal size gives control over cuts and yields. Thicker steaks, easier to portion to spec. Halal certified.",
+    venues:[{name:'Pub',strong:true},{name:'Club',strong:true},{name:'Casual Dining',strong:false},{name:'Chef Portioning',strong:false}],
+    sellingPoints:["Ideal for chef portioning — consistent primal size gives chefs control over their own cuts and yields","Thicker steaks — the primal size delivers a better face steak, easier to portion to spec","British Cross (Angus & Hereford) from the Maranoa District — reliable QLD beef with consistent eating quality","100-day grain fed, MB 0–1+ — dependable entry level grain fed spec","Halal certified — no restrictions for any customer"],
+    conversation:"If your chef likes to do their own portioning, Royal is worth a look — consistent primal size out of the Maranoa District, British Cross Angus and Hereford, 100-day grain fed. The primal size gives you a great face steak and the flexibility to cut to your own spec. Good entry level grain fed that works hard in the kitchen." },
+
+  'AMH White': { producer:"JBS Australia · Mungindi QLD", catId:'grain', tier:'Entry Level',
+    quick:"British Cross, 100-day grain fed, Mungindi QLD, Halal certified. Entry level grain fed — the most accessible price point for putting grain fed on the menu. Reliable and consistent. Versatile kitchen performer — suits steaks, roasts, stir-fries, casseroles and curries.",
+    specs:['British Cross','100-day grain fed','Mungindi QLD','Halal','Est. 1986'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["Entry level grain fed — the most accessible price point for putting grain fed on the menu","British Cross from Mungindi QLD — locally produced, reliable spec","100-day grain fed — consistent feeding program delivering dependable flavour and texture","Versatile kitchen performer — suits steaks, roasts, stir-fries, casseroles and curries","Halal certified — no restrictions for any customer"],
+    conversation:"AMH White is our entry level grain fed — British Cross, 100-day grain fed, locally produced in QLD, Halal certified. If a venue needs a reliable, consistent grain fed at the sharpest price point, this is the one. No fuss, fit for purpose." },
+
+  'AMH Black': { producer:"JBS Australia · Est. 1986, Queensland", catId:'grain', tier:'Entry Level',
+    quick:"Grain fed, MB 1+, min 100-day in JBS-operated NFAS feedlots on specialty grain rations. The natural step up from AMH White — same supply chain, same reliability, more marbling.",
+    specs:['Grain Fed','MB 1+','Min 100-day','JBS-operated NFAS feedlots','Specialty grain rations'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["Step up from AMH White within the same supply chain — consistent quality progression","MB 1+, 100-day grain fed — genuine marbling at entry level price","Specialty ration in JBS-operated NFAS feedlots — tighter quality control than standard feedlot programs"],
+    conversation:"AMH Black is the natural step up from AMH White — same supply chain, same reliability, but MB 1+ and a specialty ration in JBS-operated feedlots. More marbling, same price confidence." },
+
+  'Beef City Black': { producer:"JBS Australia · Beef City EST 170, Darling Downs QLD", catId:'grain', tier:'Entry Level',
+    quick:"British Cross YG/YP cattle, MB 0–1+, 100-day grain fed, Darling Downs QLD. Exactly the same operation as Beef City Platinum — same facility, same breed, same feeding program. The only difference is no MSA grading, so it sits at a sharper price point.",
+    specs:['British Cross','YG/YP Grade','MB 0–1+','100-day grain fed','Beef City EST 170','Darling Downs QLD'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["Same Beef City facility and spec as Platinum — identical supply chain, without the MSA grading","YG/YP cattle — younger animals, smaller primals, great face steak, consistent kitchen performance","British Cross from the Darling Downs — reliable QLD beef with proven eating quality","MB 0–1+, 100-day grain fed — solid entry to mid-range grain fed spec","Good for chef portioning — consistent primal size makes it easy to cut to spec"],
+    conversation:"Beef City Black is exactly the same operation as Platinum — same Darling Downs facility, same British Cross cattle, same 100-day grain fed program. The only difference is it's not MSA graded, so it sits at a sharper price point. If a venue wants Beef City quality without the Platinum price, this is the one." },
+
+  'Kilcoy Blue Diamond': { producer:"Kilcoy Global Foods · Sunshine Coast QLD · Since 1953", catId:'grain', tier:'Entry Level',
+    quick:"100-day grain fed, hand-selected cattle, Sunshine Coast QLD. Entry point into our grain fed range — reliable, consistent spec at the sharpest price point. Backed by Kilcoy's 70 years of processing expertise. Versatile kitchen performer.",
+    specs:['Grain Fed','100-day','Sunshine Coast QLD','Hand Selected','Since 1953'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["Entry point into our grain fed range — reliable, consistent spec at the sharpest price point","Hand-selected cattle from the Sunshine Coast — locally produced, quality controlled from the source","100-day grain fed — consistent feeding program delivering dependable flavour and texture","Kilcoy heritage since 1953 — nearly 70 years of beef processing expertise behind every product","Versatile kitchen performer — suits steaks, roasts, stir-fries and more"],
+    conversation:"Kilcoy Blue Diamond is our entry point into grain fed beef — 100-day grain fed, hand-selected cattle from the Sunshine Coast, backed by Kilcoy's 70 years of processing expertise. Reliable, consistent and priced right for venues that need a solid grain fed without the premium spend." },
+
+  'Southern Ranges': { producer:"Australian Meat Group (AMG) · Southern NSW & Victoria", catId:'grass', tier:'Super Premium',
+    quick:"100% grass-fed and finished, British breeds (Angus & Hereford), MB 2+, hormone free, MSA graded. Southern NSW and Victoria. Premium grass-fed option — a natural addition to any steak selection, offering customers a genuine grass-fed alternative with a distinctly different flavour profile to grain fed beef.",
+    specs:['100% Grass Fed/Finished','MB 2+','Hormone Free','British Breeds','Southern NSW & Victoria','MSA Graded','18–36 months'],
+    provenance:"Southern Ranges is produced by Australian Meat Group (AMG) from selected British breeds (Angus and Hereford) raised on the lush pastures of Southern NSW and Victoria — a bold flavour that sets itself apart from grain-fed products. MB 2+ marble score, hormone free, MSA graded for guaranteed tenderness. Grass-fed beef has a genuinely different flavour profile, and customers who ask for it are usually passionate about it. Works across all venue types from bistros through to premium steakhouses.",
+    venues:[{name:'All Venue Types',strong:true},{name:'Premium Steakhouse',strong:true},{name:'Fine Dining',strong:false},{name:'Health-Focused Venue',strong:false}],
+    sellingPoints:["100% grass-fed and finished — no grain at any stage, genuinely different flavour profile to grain fed beef","MB 2+, hormone free — premium grass-fed spec with clean credentials across the board","British breeds from Southern NSW and Victoria's lush pastures — consistent year-round quality from high rainfall grazing country","MSA graded — independent eating quality guarantee even without grain feeding","A natural addition to any steak selection — offers customers a genuine grass-fed alternative alongside grain fed and Wagyu options"],
+    conversation:"If your steak selection is all grain fed, Southern Ranges is worth adding — 100% grass-fed Angus and Hereford from Southern NSW and Victoria, MB 2+, hormone free, MSA graded. Grass-fed beef has a genuinely different flavour profile and customers who ask for it are usually passionate about it. Works across all venue types from bistros through to premium steakhouses." },
+
+  'Vintage Beef': { producer:"HW Greenham · Southern Australia & Tasmania", catId:'grass', tier:'Premium',
+    quick:"100% grass-fed Spanish Galician breed, minimum 60 months age, MB 3+. The breed and age story in our grass-fed range. Rich, complex old cow beef with flavour that younger cattle simply cannot produce. A natural partner to Southern Ranges on a steak selection — same grass-fed credentials, completely different flavour profile.",
+    specs:['100% Grass Fed/Finished','Spanish Galician Breed','Min 60 months age','MB 3+','HGP Free','Antibiotic Free','Free Range','GMO Free'],
+    provenance:"Vintage Beef is inspired by Spain's renowned Galician Vaca Vieja tradition. 100% grass-fed Spanish Galician cattle, processed at a minimum of 60 months of age, achieving MB 3+. The Galician breed is internationally recognised for exceptional depth of flavour and natural marbling. Rich, full-bodied beef flavour with consistent tenderness — the breed and age story in the grass-fed range. Ideal alongside Southern Ranges on any steak selection — same grass-fed credentials, completely different flavour profile and menu story.",
+    venues:[{name:'Premium Steakhouse',strong:true},{name:'Fine Dining',strong:true},{name:'Gastro Pub — Feature Dish',strong:false},{name:'Chef-Driven Concept',strong:false}],
+    sellingPoints:["Spanish Galician breed — internationally recognised for exceptional depth of flavour and natural marbling, a breed story no other product in the range can match","Minimum 60 months of age — old cow beef with rich, complex flavour that younger cattle simply can't produce","MB 3+ off grass alone — premium marbling without a grain feeding program","100% grass-fed and finished — clean provenance story for venues that champion natural farming","Versatile across venue types — works in bistros, pubs, clubs and premium steakhouses alike"],
+    conversation:"Vintage Beef is the breed and age story in our grass-fed range — Spanish Galician cattle, 100% grass-fed, minimum 5 years old. The flavour is rich and complex in a way you can't replicate with younger cattle. MB 3+ off grass alone. It's a natural partner to Southern Ranges on a steak selection — same grass-fed credentials, completely different flavour profile and menu story." },
+
+  'Roam': { producer:"Paradigm Foods · Queensland", catId:'grass', tier:'Mid-Range',
+    quick:"F1–F3 Grass Fed Wagyu, Full Blood bloodline, MB range up to 9 entirely off grass. MSA graded, no HGP, no antibiotics. The only grass-fed Wagyu program of significant scale in Australia. Queensland sourced.",
+    specs:['F1–F3 Grass Fed Wagyu','Full Blood Bloodline','MB range up to 9','MSA Graded','No HGP','No Antibiotics','Queensland'],
+    provenance:"Roam is grass-fed Wagyu from Queensland — F1–F3 with Full Blood Wagyu bloodline, MSA graded, no HGP, no antibiotics. The only grass-fed Wagyu program of significant scale in Australia. Wagyu genetics doing the work, not the feedlot — MB range up to 9 entirely off grass. A uniquely compelling menu story: Wagyu eating quality with a grass-fed, never-ever provenance that no other program can match.",
+    venues:[{name:'Restaurant',strong:true},{name:'Health-Focused Venue',strong:true},{name:'Gastro Pub — Feature',strong:false},{name:'Sustainability-Focused Dining',strong:false}],
+    sellingPoints:["The only grass-fed Wagyu program of significant scale in Australia — a genuinely unique menu story","MB range up to 9 entirely off grass — Wagyu genetics doing the work, not the feedlot","MSA graded — independent eating quality guarantee across the full range","Never-ever program — grass fed, no HGP, no antibiotics; the cleanest Wagyu provenance possible","Full Blood bloodline — genuine Wagyu genetics delivering marbling and eating quality without grain feeding"],
+    conversation:"Most people assume Wagyu has to be grain fed — Roam is the exception. Grass-fed Wagyu from Queensland, Full Blood bloodline, MSA graded, MB range up to 9 entirely off grass. It's the only program like it in Australia. If a venue wants a Wagyu on the menu with a genuine sustainability and clean eating story, this is the one." },
+
+  'AMG': { producer:"Australian Meat Group · Victoria", catId:'grass', tier:'Mid-Range',
+    quick:"British and European bred cattle from Victoria's high-rainfall grazing regions. No added hormones, no antibiotics, 100% traceable. Mid-range grass-fed option — same AMG Victorian sourcing as Southern Ranges at a more accessible price point.",
+    specs:['Pasture Fed','British/European breeds','Victoria — high rainfall','No Added Hormones','No Antibiotics','100% Traceable'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["Victorian high-rainfall sourcing — consistent quality year-round because the pastures rarely dry out","HGP and antibiotic free — clean story for operators wanting natural claims without paying super premium pricing","100% traceable — confidence for operators and their customers","British/European breed genetics — well-rounded eating quality suited to a broad range of menu applications"],
+    conversation:"If you want to put grass-fed on the menu without committing to Southern Ranges pricing, AMG gives you the same Victorian sourcing story at a mid-range price — natural claims, good eating quality, consistent supply." },
+
+  'Right to Roam': { producer:"JBS Australia · Queensland", catId:'grass', tier:'Mid-Range',
+    quick:"100% grass-fed, free range certified, MSA graded, QLD. No added hormones or antibiotics. Backed by JBS Australia. Mid-range natural credentials grass-fed option — strong for venues whose customers ask about animal welfare and provenance.",
+    specs:['100% Grass Fed','Free Range Certified','MSA Graded','Queensland','No Added Hormones','No Antibiotics','JBS Australia'],
+    provenance:"Right to Roam is 100% natural grass-fed Australian beef, sourced from free-range cattle raised on vast Australian plains and graded to MSA standards. Naturally rich, full-flavoured, and distinctly superior to grain-fed alternatives — this MSA-graded beef delivers consistent tenderness and outstanding eating quality. Free Range certified, no added hormones, no antibiotics. Backed by JBS Australia — supply reliability and food safety systems of Australia's most established meat processor. Exclusive to Moco Food Services.",
+    venues:[{name:'Restaurant',strong:true},{name:'Pub',strong:true},{name:'Steakhouse',strong:false},{name:'Catering',strong:false}],
+    sellingPoints:["100% grass-fed, free range, MSA graded — the full natural credentials package in one brand","Rich, full-flavoured grass-fed eating quality — naturally superior flavour profile to grain-fed alternatives","Free Range certified — genuine animal welfare story for venues whose customers care about how their food is raised","MSA graded — independent guaranteed tenderness and consistency, reliable kitchen performance every order","Backed by JBS Australia — supply reliability and food safety systems of Australia's most established meat processor"],
+    conversation:"Right to Roam is our mid-range natural credentials grass-fed option — 100% grass-fed, free range certified, MSA graded. Strong for venues whose customers are asking about animal welfare and provenance. Rich, full-flavoured eating quality and consistent supply backed by JBS. Sits naturally alongside AMG as a grass-fed option with a strong welfare story." },
+
+  'AMH': { producer:"JBS Australia · Queensland", catId:'grass', tier:'Entry Level',
+    quick:"Pasture fed Queensland beef, bred specifically for meat quality. Halal certified. Entry level pasture fed — fit for purpose across all venue types. Nearly 40 years of supply reliability behind it.",
+    specs:['Pasture Fed','Queensland','Halal','Est. 1986'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["Entry level pasture fed — the most accessible price point for putting grass-fed on the menu","Queensland pasture fed cattle bred specifically for meat quality — reliable eating quality at a volume price point","Halal certified — no restrictions for any customer","Nearly 40 years of supply reliability — AMH will never be short, built for high volume operators","Fit for purpose across all venue types — the go-to when consistency and price are the priority over provenance storytelling"],
+    conversation:"AMH is our entry level pasture fed — QLD raised, Halal certified, nearly 40 years of reliable supply behind it. If a venue needs consistent grass-fed at a sharp price point and high volume, this is the one. No fuss, fit for purpose." },
+
+  "Pioneer's Cut": { producer:"Moco Meats House Brand · Wacol, Brisbane", catId:'moco-beef', tier:'Featured',
+    quick:"Moco's #1 beef brand. Pasture fed Queensland beef, selectively sourced, portion cut to order at Wacol. Trusted by thousands of customers. Consistency — Quality — Value.",
+    specs:['Pasture Fed','Queensland Beef','Selectively Sourced','Portion Cut to Order','Exclusive to Moco'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["Moco's #1 beef brand — trusted by thousands of customers, the most popular beef in the portfolio","Pasture fed Queensland beef, selectively sourced — local provenance, consistent quality built in from the source","Portion cut to order — exact spec every time, no waste, no variation","Consistency, quality, value — the three things every busy kitchen needs, delivered in one house brand","Exclusive to Moco — competitors can't directly price-match"],
+    conversation:"Pioneer's Cut is our number one beef brand — pasture fed Queensland beef, portion cut to order at Wacol to your exact spec. Thousands of customers trust it for a reason — consistency, quality and value every single order. If you're not running it already, it's worth a look." },
+
+  "Jack's Best": { producer:"Moco Meats House Brand · Wacol, Brisbane", catId:'moco-beef', tier:'Featured',
+    quick:"Moco's best selling steak. 100-day grain fed Queensland beef, portion cut to order. Inspired by the Sisely brothers — 19th century Victorian butchers legendary for sourcing the finest cuts. Selectively sourced by our expert butchers.",
+    specs:['100-day Grain Fed','Queensland Beef','MB 2+','Portion Cut to Order','Exclusive to Moco'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["Moco's best selling steak — the most popular grain fed in the portfolio, trusted by venues across the territory","100-day grain fed Queensland beef — premium grain fed spec, selectively sourced by our own team of expert butchers","Portion cut to order — exact spec every time, no waste, no variation","Inspired by the Sisely brothers — 19th century Victorian butchers who travelled farm to farm sourcing the greatest cuts, a heritage story built into the brand","Exclusive to Moco — competitors can't directly price-match"],
+    conversation:"Jack's Best is our best selling steak — 100-day grain fed Queensland beef, portion cut to order by our team at Wacol. It's inspired by the Sisely brothers, 19th century Victorian butchers who became legendary for sourcing the finest cuts. Same philosophy today — selectively sourced, expertly portioned. If you're not running it already, there's a reason every venue that tries it keeps coming back." },
+
+  'Centenary Station': { producer:"Moco Meats House Brand · Wacol, Brisbane", catId:'moco-beef', tier:'Featured',
+    quick:"Pasture raised, 100+ day grain finished, MB 2+. Sustainably produced, full traceability, strong animal welfare commitment. Deep flavour and fine even marbling — trusted by chefs, butchers and foodservice professionals. Premium grain fed at house brand pricing.",
+    specs:['Pasture Raised','100+ Day Grain Fed','MB 2+','Sustainably Produced','Full Traceability','Exclusive to Moco'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["MB 2+ at house brand pricing — premium marbling and eating quality without carton premium brand cost","Pasture raised then 100+ day grain finished — heritage, quality and consistent performance in every cut","Deep flavour and fine even marbling — celebrated eating quality trusted by chefs, butchers and foodservice professionals","Sustainably produced, full traceability, strong animal welfare commitment — clean credentials across the board","Exclusive to Moco — competitors can't directly price-match"],
+    conversation:"Centenary Station is our premium house brand — pasture raised, 100+ day grain fed, MB 2+. Deep flavour, fine even marbling, trusted by chefs and foodservice professionals. You get premium grain fed eating quality at a house brand price point. If a venue wants to step up from Jack's Best without going to a carton brand, this is the natural move." },
+
+  'Margra': { producer:"Tattykeel Australian Whites · Oberon NSW · Paradigm Foods", catId:'all-lamb', tier:'Super Premium',
+    quick:"100% Australian White breed from Tattykeel genetics — bred specifically for professional kitchen performance. Micro-marbling with fat melting point of 28–35°C — far lower than conventional lamb, closer to Wagyu. Mild aroma, fine silky texture, no strong lamby flavour. Hormone free, antibiotic free, grass-fed, no feedlots. Featured at Woodcut, Sixpenny, Poly, Kiyomi and more.",
+    specs:['Australian White breed','Tattykeel genetics','Fat melt point 28–35°C','Micro-marbled','Hormone Free','Antibiotic Free','Grass Fed','No Feedlots','Oberon NSW'],
+    provenance:"Margra — named from (Mar)tin and (Gra)ham Gilmore — is the result of two brothers from Oberon NSW dedicating over a decade to developing a fully haired meat sheep specifically bred for Australian conditions and professional kitchen performance. The Australian White breed was developed through careful genetic selection for meat yield, eating quality and climate resilience. The result is a lamb with characteristics genuinely unlike any other: fat that melts between 28–35°C (room temperature) producing a clean, buttery palate; micro-marbling dispersed throughout every cut; mild aroma with no lanolin contamination from wool. Chefs describe it as lamb that behaves more like Wagyu on the plate.",
+    venues:[{name:'Fine Dining',strong:true},{name:'Premium Restaurant',strong:true},{name:'Chef-Driven Concept',strong:false},{name:'Hotel Dining',strong:false}],
+    sellingPoints:["Uniquely low fat melting point (28–35°C) — fat becomes buttery at room temperature, completely different eating experience to conventional lamb","No strong lamby flavour — mild aroma, fine silky texture; works with delicate pairings conventional lamb would overpower","Fat crisps like pork belly crackling — a characteristic that opens new menu possibilities for rack and belly","Hormone free, antibiotic free, grass fed, no feedlots — complete clean credentials","Featured at Woodcut, Sixpenny, Poly, Kiyomi — credibility that speaks directly to fine dining chefs"],
+    conversation:"Have you ever had lamb with a fat that crisps like pork belly crackling? That's Margra — the fat melting point is so low it behaves completely differently on the grill. Mild aroma, micro-marbled, no strong lamby flavour. It's the reason Sixpenny and Woodcut won't use anything else." },
+
+  'Sovereign': { producer:"Australian Lamb Company / Minerva Foods · Central Victoria", catId:'all-lamb', tier:'Premium',
+    quick:"Our most extensive lamb range — broadest cut selection, best availability 12 months of the year. 100% Australian pasture fed, Central Victoria. No added hormones. 2026 Royal Queensland Show gold — restaurant trade class. Works for every venue type from bistros through to fine dining.",
+    specs:['Pasture Fed','Central Victoria','100% Australian','No Added Hormones','Hand Selected','2026 RQ Show Gold','Minerva Foods'],
+    provenance:"Sovereign is regarded as some of the finest lamb in the country, grown on the crisp pastures of Central Victoria where lush pastures give you extremely high-quality lamb. 100% Australian pasture fed, no added hormones, natural flavour with minimal fat. Our most extensive lamb range — the broadest cut selection available, 12 months of the year. Gold medallist at the 2026 Royal Queensland Show in the restaurant trade class. Produced by the Australian Lamb Company / Minerva Foods, exported to 70+ countries.",
+    venues:[{name:'All Venue Types',strong:true},{name:'Fine Dining',strong:true},{name:'Premium Restaurant',strong:true},{name:'Pub · Club · Bistro',strong:false}],
+    sellingPoints:["Our most extensive lamb range — the broadest cut selection available across the portfolio, 12 months of the year","2026 Royal Queensland Show gold medallist — restaurant trade class, independent proof of food service quality","Central Victoria pasture fed — lush Victorian pastures producing some of the finest lamb in the country","Natural flavour, minimal fat — clean eating quality that works across all venue types and menu styles","100% Australian, no added hormones — clean credentials for venues that put provenance on the menu"],
+    conversation:"Sovereign is our go-to lamb — the largest range we carry, best availability 12 months of the year, and it just won gold at the Royal Queensland Show in the restaurant trade class. Central Victorian pasture fed, no added hormones, natural flavour. Works for every venue type from bistros through to fine dining. If you're only going to run one lamb, this is the one." },
+
+  'Snowy Peaks': { producer:"Spring Grove Fresh Food Company · Kyogle, Northern Rivers NSW", catId:'all-lamb', tier:'Mid-Range',
+    quick:"Pasture fed, Southern NSW and Victoria, hormone free, hand selected at processing. Produced by Spring Grove in Kyogle — as local as it gets for Northern Rivers venues. Boned, rolled and netted — kitchen-ready. Mid-range option for pubs, clubs and casual dining.",
+    specs:['Pasture Fed','Southern NSW & Victoria','Hormone Free','Hand Selected at Processing','Spring Grove','Kyogle NSW'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["Local Northern Rivers story — produced by Spring Grove in Kyogle, as local as it gets for Northern Rivers venues","Hand-selected at final processing — quality assessed by humans at the final stage, not just graded","Hormone free, Southern NSW and Victoria sourcing — crisp cool climate pastures producing flavoursome, juicy and tender lamb","Kitchen-ready preparation — boned, rolled and netted, maintaining shape during cooking","Mid-range price point — solid pasture fed lamb for pubs, clubs and casual dining without the premium spend"],
+    conversation:"Snowy Peaks is produced by Spring Grove right here in Kyogle — it doesn't get more local for a Northern Rivers venue. Pasture fed from Southern NSW and Victoria, hormone free, hand-selected at processing, and it comes boned, rolled and netted so it's kitchen-ready. Great mid-range lamb for pubs and clubs that want a clean provenance story without the premium price tag." },
+
+  'Ambassador': { producer:"Australian Lamb Company / Minerva Foods · Colac, Victoria", catId:'all-lamb', tier:'Entry Level',
+    quick:"Entry level. 3.8 million lambs per year from the same ALC facility as Sovereign — same quality systems, same processing standards, entry level pricing. Exported to 70+ countries. The volume play for customers who need scale and consistent supply without the Sovereign price.",
+    specs:['Pasture Fed','Hand Selected','Colac VIC','3.8 million lambs/yr','Same ALC quality standards','70+ countries'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["Same ALC quality standards as Sovereign — same facility, same quality systems, entry level price","3.8 million lambs per year — volume and supply certainty that no other lamb brand in the portfolio can match","Exported to 70+ countries — global demand proving consistent quality at scale","Entry level price point — the most accessible way to put reliable ALC lamb on the menu"],
+    conversation:"Ambassador comes from the same ALC facility as Sovereign — same quality systems, same processing standards, same 3.8 million lambs per year operation. Entry level price, Sovereign quality DNA. For customers that need volume and consistent supply, it's the natural choice." },
+
+  'Borrowdale': { producer:"Hewitt Foods · Central Victoria · APIQ Certified Free Range", catId:'all-pork', tier:'Super Premium',
+    quick:"APIQ certified free range, Central Victoria. No moisture infusion — pork eating quality is genuine and comes from the animal itself. Hormone free. Carbon Neutral certified. Produced by Hewitt Foods. Gold medal 2025 RAS Sydney Fine Food Awards. Won Australia's Best Pork Steak 2018. Free range actually means something here.",
+    specs:['APIQ Certified Free Range','No Moisture Infusion','Hormone Free','Carbon Neutral','Central Victoria','Hewitt Foods'],
+    provenance:"Borrowdale is produced by Hewitt Foods in Central Victoria — APIQ certified free range, meaning pigs have outdoor access their entire lives with wallows and space to forage. Hormone free. Crucially, no moisture infusion — the process where saline solution is injected into pork to artificially boost weight and juiciness. Without infusion, Borrowdale's eating quality is genuine and comes from the animal itself. Carbon Neutral certified. Gold medal at the 2025 RAS Sydney Fine Food Awards. Won Australia's Best Pork Steak 2018. Free range actually means something here.",
+    venues:[{name:'Fine Dining',strong:true},{name:'Premium Restaurant',strong:true},{name:'Gastro Pub',strong:false},{name:'Sustainability-Focused Venue',strong:false}],
+    sellingPoints:["No moisture infusion — natural pork eating quality from the animal itself; chefs who've cooked both notice the difference immediately","APIQ certified free range — one of the highest free range standards in Australian pork, a genuine claim that stands up","Hormone free, Carbon Neutral certified — strong sustainability and clean credentials for venues that care about provenance","Gold medal RAS 2025, Australia's Best Pork Steak 2018 — credentialed quality chefs can put on menus with confidence"],
+    conversation:"Most commercial pork has been moisture infused — a saline solution injected to boost weight and juiciness. Borrowdale hasn't. APIQ certified free range in Central Victoria, no moisture infusion, hormone free, Carbon Neutral. The eating quality is genuine and it shows on the plate. Chefs who've cooked both products say the difference is obvious. Two national awards back that up." },
+
+  'Oria': { producer:"Spring Grove Fresh Food Company · Kyogle, Northern Rivers NSW", catId:'all-pork', tier:'Super Premium',
+    quick:"Unique almond-fed program — Australian almonds milled into the pigs' diet by a specialist nutritionist. Sow stall free. Solar powered facility. Local Northern Rivers provenance. Natural sweetness and tenderness from the almond diet. Developed in partnership with one of Australia's leading pork producing families.",
+    specs:['Almond Fed','Sow Stall Free','Solar Powered Facility','Nutritionist Formulated Diet','Kyogle NSW','Spring Grove'],
+    provenance:"Oria is Spring Grove's signature premium pork — developed in partnership with one of Australia's leading pork producing families and built around a genuinely distinctive feeding protocol. Australian almonds are milled into the pigs' diet, formulated by a specialist nutritionist. The almond inclusion adds natural sweetness, contributes to richer fat quality and produces a more tender eating experience. The facility operates on a 35kw solar power system and all sows are stall-free. Produced in Kyogle, Northern Rivers NSW — locally relevant to a significant portion of the Moco customer base.",
+    venues:[{name:'Fine Dining',strong:true},{name:'Premium Restaurant',strong:true},{name:'Gastro Pub',strong:false},{name:'Chef-Driven Concept',strong:false}],
+    sellingPoints:["Only almond-fed pork in the portfolio — a unique, conversation-worthy production story that writes itself on a menu","Natural sweetness and tenderness from the almond diet — noticeable difference on the plate, not just a marketing claim","Solar powered, sow stall free — sustainability and animal welfare credentials built into the operation","Local Northern Rivers provenance — produced in Kyogle; as local as it gets for Northern Rivers venues"],
+    conversation:"Have you ever put almond fed on a menu? Oria is genuinely almond fed — Australian almonds milled into the diet by a nutritionist. Natural sweetness, better fat quality, sow stall free, solar powered facility. And it's produced right here in Kyogle. For a Northern Rivers venue that wants a genuine local super-premium pork story, this is the one." },
+
+  'Apple Tree': { producer:"SEQ Farmer Collaborative · South East Queensland", catId:'all-pork', tier:'Premium',
+    quick:"100% Australian grain fed pork from a SEQ farmer collaborative. Stringent carcass specifications — fat depth, meat colour and eating quality assessed on every animal. Strong animal welfare commitment. Rind on, kitchen-ready. Suits all venue types including premium dining.",
+    specs:['100% Australian','Grain Fed','SEQ Farmer Collaborative','Stringent Carcass Spec','Animal Welfare Commitment','Rind On Kitchen-Ready'],
+    provenance:"Apple Tree is a collaborative program run by a group of South East Queensland farmers who select only the best pigs. 100% Australian grain fed pork — pigs fed a high-quality, nutrient-rich diet grown close to the farms, specifically rationed and blended for the Apple Tree program. Stringent carcass specifications on every animal — fat depth, meat colour and eating quality all assessed before processing. Strong animal welfare commitment across the program. Rind on, kitchen-ready product available. Suits all venue types including premium dining.",
+    venues:[{name:'Restaurant',strong:true},{name:'Premium Pub',strong:true},{name:'Hotel Dining',strong:false},{name:'All Venue Types',strong:false}],
+    sellingPoints:["Stringent carcass specifications — fat depth, meat colour and eating quality assessed on every animal before processing","100% Australian grain fed, SEQ farmer collaborative — genuine local provenance from QLD farming families","Strong animal welfare commitment across the whole program","Rind on, kitchen-ready — product prepared for the professional kitchen, reducing prep time and waste","Suits all venue types including premium dining — versatile across the customer base"],
+    conversation:"Apple Tree is 100% Australian grain fed pork from a SEQ farmer collaborative — Queensland farming families with strict carcass specs on every animal. Fat depth, meat colour, eating quality — all assessed before it leaves the farm. Rind on, kitchen-ready, suits all venue types. A solid premium pork with a genuine local story." },
+
+  'Barkers Creek': { producer:"SunPork Fresh Foods · Kingaroy / Eagle Farm QLD", catId:'all-pork', tier:'Mid-Range',
+    quick:"Produced by SunPork. Moisture-infused raw pork program — infusion enhances juiciness and tenderness, making it forgiving to cook under service pressure. Also includes value-added cooked products: ribs and pork belly. Positioned for high-volume kitchens that need consistent, labour-saving solutions.",
+    specs:['Moisture Infused Raw','Cooked value-added range','Ribs & pork belly','SunPork production','100% Australian Pork'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["Moisture infusion makes it harder to overcook — ideal for high-volume kitchens where consistency under pressure matters","Cooked value-added range (ribs, pork belly) — arrive ready to heat, freeing kitchen time for other dishes","SunPork production — backed by Queensland's largest pork producer, guaranteed supply from 48 Australian farms","Mid-range price — delivers pork eating quality and consistency at a price that works for bistro and casual dining margins"],
+    conversation:"How much time does your kitchen spend on pork during a Saturday service? Barkers Creek cooked ribs and belly arrive ready to heat — labour cost back in the bank and a consistent product every time." },
+
+  'MOR': { producer:"Spring Grove Fresh Food Company · Kyogle, Northern Rivers NSW", catId:'all-pork', tier:'Mid-Range',
+    quick:"Moisture-infused pork sourced directly from farmers in the Northern Rivers NSW and South Burnett QLD regions — supporting local Australian farming families. 100% Australian pork. Produced by Spring Grove Fresh Food Company, Kyogle. Forgiving to cook, juicy and tender result.",
+    specs:['Moisture Infused','100% Australian Pork','Northern Rivers NSW','South Burnett QLD','Spring Grove'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["Local Northern Rivers sourcing — directly from farming families in the region; a community story that resonates with local venue operators","Moisture infused — less likely to dry out under service pressure, more consistent eating result for the diner","100% Australian from named regions — traceable origin story, not just a generic \"Australian pork\" claim","Spring Grove production — same Kyogle producer as Oria and Snowy Peaks; the Northern Rivers food provenance connection"],
+    conversation:"Do you put 'locally sourced' on your menu? MOR pork comes directly from Northern Rivers and South Burnett farming families — it doesn't get more local for your customers." },
+
+  "Schulz's": { producer:"Schulz's Wholesale Meats · Yamanto, Ipswich QLD · Est. 1986", catId:'all-pork', tier:'Entry Level',
+    quick:"Fresh pork primarily. Schulz's Wholesale Meats, established 1986 by Bevin and Merilyn Schulz, Yamanto/Ipswich QLD. One of SEQ's most respected fresh meat wholesale operations. Reliable, local, value-focused. Well-known name to experienced SEQ operators.",
+    specs:['Fresh Pork','Yamanto / Ipswich QLD','Est. 1986','SEQ Wholesale'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["40 years of SEQ wholesale expertise — a well-known name to experienced operators in the Ipswich and greater Brisbane region","Fresh pork focus — for operators who want fresh product rather than processed or value-added","Entry price point — the most cost-effective fresh pork option in the portfolio","Local supply chain — shorter from farm to customer than national brands"],
+    conversation:"If fresh pork at entry price is what your kitchen needs, Schulz's is a name SEQ operators know and trust — 40 years in Ipswich, straight to market." },
+
+  'Sunpork': { producer:"SunPork Group · Kingaroy & Eagle Farm QLD", catId:'all-pork', tier:'Entry Level',
+    quick:"Australia's largest pork producer — 20% of national output, 1.1 million pigs per year. Three generations of pig farming, Darling Downs and South Burnett QLD. 100% grain fed, no added hormones, vet-formulated rations. 48 farms across 4 states. Swickers Kingaroy — the only export-accredited pig abattoir in QLD. Scale and consistency are the defining selling points.",
+    specs:['100% Australian','100% Grain Fed','No Added Hormones','20% of national output','48 farms · 4 states','Kingaroy & Eagle Farm QLD','Vet formulated rations'],
+    provenance:"SunPork was founded by farming families from the Darling Downs and South Burnett who came together to protect the quality of their produce by controlling the whole supply chain. Today, three generations of pig farming experience underpin a business that produces 20% of all Australian pork — 1.1 million pigs per year across 48 farms in 4 states. Processing at Swickers Kingaroy — the only export-accredited pig abattoir in Queensland — and Eagle Farm Brisbane. Grain fed to veterinarian-formulated specifications. No added hormones. Fully vertically integrated from genetics to fork.",
+    venues:[{name:'Pub — High Volume',strong:true},{name:'Club — Volume',strong:true},{name:'Casual Dining',strong:false},{name:'Cafe',strong:false}],
+    sellingPoints:["Australia's largest pork producer — 20% of national output means supply is never a concern, regardless of volume","Vertically integrated from genetics to plate — the tightest possible quality and supply chain control in the industry","Queensland-based processing (Kingaroy and Eagle Farm) — locally processed, faster to market, fresher product","Vet-formulated grain rations — the animal nutrition program is scientifically designed, not a generic feedlot ration"],
+    conversation:"If you're running high volume pork and supply consistency is your biggest concern, Sunpork produces 20% of all Australian pork — locally processed in Queensland, no added hormones, vet-formulated grain fed." },
+
+  'Spring Grove': { producer:"Spring Grove Fresh Food Company · Kyogle, Northern Rivers NSW · Est. 1996", catId:'all-pork', tier:'Entry Level',
+    quick:"Spring Grove Fresh Food Company, founded 1996 by Mark McCaughey, Kyogle NSW. Family-owned, boutique wholesale. Sow stall free, 100% Australian. Also produces Oria and MOR under the same umbrella — a pathway to trade customers up within the same supply relationship. Locally relevant for Northern Rivers NSW customers.",
+    specs:['100% Australian Pork','Sow Stall Free','Kyogle NSW','Family Owned Est. 1996'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["Northern Rivers provenance — genuinely local for Byron Bay, Ballina, Lismore, Tweed Heads operators; a community story worth telling","Family owned and operated since 1996 — supplier story that resonates with regional venues and farm-to-fork concepts","Sow stall free — animal welfare claim without the premium price of APIQ certification","Same producer as Oria and MOR — a natural pathway to trade customers up within the same supply relationship"],
+    conversation:"For a Northern Rivers venue, Spring Grove is as local as it gets — Kyogle-based, family owned since 1996, sow stall free. And if you want to step up, Oria and MOR come from the same producer." },
+
+  'Acacia Valley': { producer:"Moco Meats House Brand · Exclusive to Moco", catId:'moco-chicken', tier:'Featured',
+    quick:"100% Australian chicken, traceable farm to plate, no added hormones, quality-assured farms. Exclusive to Moco. Full chicken range — breast, thigh, Maryland, drumstick, whole birds and specialty cuts — portion cut to order by our team at Wacol. Consistent quality, Moco-controlled spec, competitive pricing.",
+    specs:['100% Australian','Traceable Farm to Plate','No Added Hormones','Quality-Assured Farms','Portion Cut to Order','Exclusive to Moco'],
+    provenance:null,
+    venues:[],
+    sellingPoints:["100% Australian, traceable farm to plate — clean provenance credentials for venues that care about sourcing","No added hormones — natural chicken story across the full range","Quality-assured farms — rigorous standards from farm through to processing","Portion cut to order by our team at Wacol — exact spec every time, no waste, no variation","Exclusive to Moco — consistent supply, house brand pricing, competitors can't directly price-match"],
+    conversation:"Acacia Valley is Moco's own chicken brand — 100% Australian, traceable farm to plate, no added hormones, quality-assured farms. Exclusive to us, which means your supply comes with the same service and consistency guarantee as our beef. Portion cut to order at Wacol. If you want one trusted supplier for chicken and beef, this is the simplest solution." },
+};
+
+/* ── DATA ── */
+const DATA = [
+  { id:'beef', name:'Beef', count:'32 brands',
+    direct:false,
+    categories:[
+      { id:'wagyu',     name:'Wagyu',             desc:'Full Blood to F1 Crossbred',       n:7,  accent:'#8B2A12', isMoco:false,
+        tiers:{'Super Premium':['Muse','Sir Harry','Senku'],'Premium':['Jacks Creek Pure Bred'],'Mid-Range':['Icon XB','Black Opal'],'Entry Level':['Jacks Creek Cross Bred']}},
+      { id:'grain',     name:'Grain Fed',          desc:'100-day to 150-day programs',      n:14, accent:'#8B6018', isMoco:false,
+        tiers:{'Super Premium':['The Bachelor','Pure Prime'],'Premium':['Ebony Black Angus','Jacks Creek Black Angus','Riverina Black Angus','Yardstick','Kilcoy Black Diamond'],'Mid-Range':['Beef City Platinum','Royal'],'Entry Level':['AMH White','AMH Black','Beef City Black','Kilcoy Blue Diamond']}},
+      { id:'grass',     name:'Grass / Pasture Fed', desc:'Pasture raised, natural production', n:7, accent:'#2A5C22', isMoco:false,
+        tiers:{'Super Premium':['Southern Ranges'],'Premium':['Vintage Beef'],'Mid-Range':['Roam','AMG','Right to Roam'],'Entry Level':['AMH']}},
+      { id:'moco-beef', name:'Moco Brands',        desc:"Moco's own exclusive beef range",   n:3, accent:'#1A3A8B', isMoco:true,
+        tiers:{'Featured':["Pioneer's Cut","Jack's Best",'Centenary Station']}}
+    ]
+  },
+  { id:'lamb', name:'Lamb', count:'4 brands',
+    direct:true, directCat:'all-lamb',
+    categories:[
+      { id:'all-lamb', name:'All Lamb', desc:'Super Premium to Entry Level', n:4, accent:'#7A3A18', isMoco:false,
+        tiers:{'Super Premium':['Margra'],'Premium':['Sovereign'],'Mid-Range':['Snowy Peaks'],'Entry Level':['Ambassador']}}
+    ]
+  },
+  { id:'pork', name:'Pork', count:'8 brands',
+    direct:true, directCat:'all-pork',
+    categories:[
+      { id:'all-pork', name:'All Pork', desc:'Free Range to Volume', n:8, accent:'#6A2258', isMoco:false,
+        tiers:{'Super Premium':['Borrowdale','Oria'],'Premium':['Apple Tree'],'Mid-Range':['Barkers Creek','MOR'],'Entry Level':["Schulz's",'Sunpork','Spring Grove']}}
+    ]
+  },
+  { id:'chicken', name:'Chicken', count:'1 brand',
+    direct:true, directCat:'moco-chicken',
+    categories:[
+      { id:'moco-chicken', name:'Moco Brands', desc:"Moco's exclusive chicken range", n:1, accent:'#1A3A8B', isMoco:true,
+        tiers:{'Featured':['Acacia Valley']}}
+    ]
+  }
+];
+
+const TC = {'Super Premium':'sp','Premium':'pr','Mid-Range':'mr','Entry Level':'en','Featured':'fe'};
+
+/* ── STATE ── */
+let cur = 'home', stack = [], selSpecies = null, selCat = null, selBrand = null;
+let navLocked = false;
+
+/* ── HELPERS ── */
+function getSp()  { return DATA.find(s => s.id === selSpecies); }
+function getCat() { const sp = getSp(); return sp ? sp.categories.find(c => c.id === selCat) : null; }
+
+/* ── ANIMATION ── */
+const DUR_FWD  = 320;
+const DUR_BACK = 320; // same duration both ways — Safari handles consistent durations more reliably
+
+function animFwd(fromId, toId) {
+  const from = document.getElementById('sc-' + fromId);
+  const to   = document.getElementById('sc-' + toId);
+
+  // Ensure clean state — no inline overrides
+  from.style.cssText = '';
+  to.style.cssText   = '';
+
+  // Position incoming screen off-right (its default), push current screen behind
+  from.classList.add('behind');
+  to.classList.add('active');
+  to.scrollTop = 0;
+
+  // Stagger section hero title
+  const shTitle = to.querySelector('.sh-title');
+  if (shTitle) {
+    shTitle.classList.remove('animate-in');
+    void shTitle.offsetWidth;
+    shTitle.classList.add('animate-in');
+  }
+
+  setTimeout(() => {
+    from.classList.remove('active', 'behind');
+    navLocked = false;
+  }, DUR_FWD + 50);
+}
+
+function animBack(fromId, toId) {
+  const from = document.getElementById('sc-' + fromId);
+  const to   = document.getElementById('sc-' + toId);
+
+  // Wipe any inline styles — clean slate for Safari
+  from.style.cssText = '';
+  to.style.cssText   = '';
+
+  // If the destination isn't already sitting behind (e.g. after a jumpBack),
+  // snap it there instantly before animating — suppress transition during snap
+  if (!to.classList.contains('behind') && !to.classList.contains('active')) {
+    to.style.transition = 'none';
+    to.style.transform  = 'translateX(-22%)';
+    void to.offsetHeight; // force reflow so Safari registers the snap
+    to.style.cssText = ''; // clear inline — CSS class takes over
+  }
+
+  // Now animate: bring destination forward, slide current off-right
+  requestAnimationFrame(() => {
+    to.classList.add('active');
+    to.classList.remove('behind');
+    from.classList.remove('active');
+    from.classList.remove('behind');
+
+    setTimeout(() => {
+      from.classList.remove('active', 'behind');
+      navLocked = false;
+    }, DUR_BACK + 50);
+  });
+}
+
+/* ── NAVIGATION ── */
+function push(toId, updates) {
+  if (navLocked) return;
+  navLocked = true;
+  if (updates) {
+    if (updates.species !== undefined) selSpecies = updates.species;
+    if (updates.cat     !== undefined) selCat     = updates.cat;
+    if (updates.brand   !== undefined) selBrand   = updates.brand;
+  }
+  const fromId = cur;
+  stack.push(fromId);
+  renderScreen(toId);
+  updateTopbar(toId);
+  // Apply category theme after render
+  if (selCat) applyTheme(selCat, toId);
+  animFwd(fromId, toId);
+  cur = toId;
+}
+
+function goBack() {
+  if (sheetOpen) { closeSheet(); return; }
+  if (navLocked || !stack.length) return;
+  navLocked = true;
+  const prevId = stack.pop();
+  const fromId = cur;
+  updateTopbar(prevId);
+  // Reapply theme for destination screen
+  if (selCat) applyTheme(selCat, prevId);
+  animBack(fromId, prevId);
+  cur = prevId;
+}
+
+function jumpBack(targetId) {
+  if (sheetOpen) closeSheet();
+  if (navLocked || targetId === cur) return;
+  navLocked = true;
+  const fromId = cur;
+  const idx = stack.lastIndexOf(targetId);
+  if (idx !== -1) stack = stack.slice(0, idx);
+  else stack = [];
+  updateTopbar(targetId);
+  if (selCat) applyTheme(selCat, targetId);
+  animBack(fromId, targetId);
+  cur = targetId;
+}
+
+/* ── RENDER ── */
+function renderScreen(id) {
+  if (id === 'cats')   renderCats();
+  if (id === 'brands') renderBrands();
+}
+
+function heroTitle(sp, cat) {
+  if (cat.id === 'all-lamb')     return 'Lamb';
+  if (cat.id === 'all-pork')     return 'Pork';
+  if (cat.id === 'moco-chicken') return 'Acacia Valley Chicken';
+  return cat.name;
+}
+
+function renderHome() {
+  document.getElementById('species-grid').innerHTML = DATA.map(sp => `
+    <div class="species-card" data-nav="species" data-id="${sp.id}">
+      <div class="s-icon">${ICONS[sp.id]}</div>
+      <div class="s-name">${sp.name}</div>
+      <div class="s-count">${sp.count}</div>
+    </div>`).join('');
+}
+
+function renderCats() {
+  const sp = getSp();
+  const total = sp.categories.reduce((a,c) => a + c.n, 0);
+  document.getElementById('cats-hero').innerHTML = `
+    <div class="sh-icon">${ICONS[sp.id]}</div>
+    <div class="sh-title">${sp.name}</div>
+    <div class="sh-rule"></div>
+    <div class="sh-sub">${sp.categories.length} categories &nbsp;&middot;&nbsp; ${total} brands</div>`;
+  document.getElementById('cats-meta').textContent = 'Select a category';
+  document.getElementById('cat-list').innerHTML = sp.categories.map(c => {
+    const theme = CAT_THEMES[c.id] || {};
+    const cardGlow = theme.cardGlow || 'transparent';
+    return `
+    <div class="cat-card" style="--cat-accent:${c.accent}; --cat-card-glow:${cardGlow}" data-nav="cat" data-id="${c.id}">
+      <div class="cat-left">
+        <div class="cat-name">${c.name}</div>
+        <div class="cat-desc">${c.desc}</div>
+        ${c.isMoco ? '<div class="moco-tag">&#9733; Push priority</div>' : ''}
+      </div>
+      <div class="cat-right">
+        <div class="cat-pill">${c.n} brand${c.n !== 1 ? 's' : ''}</div>
+        <div class="cat-arrow">&#8250;</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderBrands() {
+  const sp  = getSp();
+  const cat = getCat();
+  const totalBrands = Object.values(cat.tiers).flat().length;
+  const title = heroTitle(sp, cat);
+
+  document.getElementById('brands-hero').innerHTML = `
+    <div class="sh-eyebrow">${sp.name}</div>
+    <div class="sh-title">${title}</div>
+    <div class="sh-rule"></div>
+    <div class="sh-sub">${totalBrands} brand${totalBrands !== 1 ? 's' : ''}</div>`;
+
+  let html = '';
+  if (cat.isMoco) {
+    const brands = Object.values(cat.tiers).flat();
+    html = `<div class="moco-notice">&#9733; <strong>Push priority.</strong> Know these brands inside out and lead with them whenever it's the right fit for the customer.</div>
+    <div class="moco-grid">${brands.map(b => {
+      const isAcacia = b === 'Acacia Valley';
+      const cardStyle = isAcacia
+        ? 'background:linear-gradient(140deg,#1A3A1C 0%,#0F2410 100%);border-color:rgba(43,107,53,0.4);'
+        : '';
+      const tagStyle = isAcacia ? 'color:rgba(100,180,100,0.5);' : '';
+      return `<div class="moco-card" style="${cardStyle}" data-nav="brand" data-id="${b.replace(/"/g,'&quot;')}">
+        <div class="mc-name" style="${isAcacia ? 'color:#E0F0E0;' : ''}">${b}</div>
+        <div class="mc-sub" style="${tagStyle}">Tap to explore</div>
+      </div>`;
+    }).join('')}
+    </div>`;
+  } else {
+    const theme = CAT_THEMES[cat.id] || {};
+    html = Object.entries(cat.tiers).map(([tier, brands]) => {
+      const tc = TC[tier] || 'en';
+      return `<div class="tier-block">
+        <div class="tier-row"><span class="tier-tag ${tc}">${tier}</span><div class="tier-line"></div></div>
+        <div class="brands-grid">${brands.map(b => `
+          <div class="brand-card ${tc}" data-nav="brand" data-id="${b.replace(/"/g,'&quot;')}">
+            <div class="bc-photo-s3" style="background:${theme.bannerBg || 'var(--bg-raised)'};background-image:url(images/brands/thumbs/${brandSlug(b)}-thumb.jpg);background-size:cover;background-position:center;--bc-photo-text:${theme.bannerText || 'rgba(196,151,58,0.22)'}">
+            </div>
+            <div class="bc-name">${b}</div>
+            <div class="bc-tier ${tc}">${tier}</div>
+            <div class="bc-cta">Tap to explore &#8250;</div>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('brands-content').innerHTML = html;
+}
+
+/* ── TOPBAR / BREADCRUMB ── */
+function updateTopbar(screenId) {
+  const sp  = getSp();
+  const cat = getCat();
+  const id  = screenId || cur;
+  let bc = '';
+
+  if (id === 'cats') {
+    bc = `<span class="bc-link" data-jump="home">Home</span>
+          <span class="bc-sep">&#8250;</span>
+          <span class="bc-cur">${sp ? sp.name : ''}</span>`;
+  } else if (id === 'brands') {
+    if (sp && sp.direct) {
+      bc = `<span class="bc-link" data-jump="home">Home</span>
+            <span class="bc-sep">&#8250;</span>
+            <span class="bc-cur">${sp.name}</span>`;
+    } else {
+      bc = `<span class="bc-link" data-jump="home">Home</span>
+            <span class="bc-sep">&#8250;</span>
+            <span class="bc-link" data-jump="cats">${sp ? sp.name : ''}</span>
+            <span class="bc-sep">&#8250;</span>
+            <span class="bc-cur">${cat ? cat.name : ''}</span>`;
+    }
+  }
+
+  const bcEl = document.getElementById(id + '-bc');
+  if (bcEl) bcEl.innerHTML = bc;
+}
+
+/* ── STAGE 3: BRAND SHEET ── */
+let sheetOpen = false;
+const TIER_CLASS = {'Super Premium':'sp','Premium':'pr','Mid-Range':'mr','Entry Level':'en','Featured':'fe'};
+
+function catLabel(catId) {
+  const map = { wagyu:'Wagyu', grain:'Grain Fed', grass:'Grass / Pasture Fed', 'moco-beef':'Beef — Moco Brands',
+    'all-lamb':'Lamb', 'all-pork':'Pork', 'moco-chicken':'Chicken — Moco Brands' };
+  return map[catId] || catId;
+}
+
+function buildSheetHTML(name, b) {
+  const theme = CAT_THEMES[b.catId] || {};
+  const tc = TIER_CLASS[b.tier] || 'en';
+
+  const venuesHTML = b.venues.map(v => `<span class="venue-chip${v.strong ? ' strong' : ''}">${v.name}</span>`).join('');
+
+  const provBlock = b.provenance ? `
+    <div class="acc-block" id="acc-provenance">
+      <div class="acc-header"><span class="acc-title">Provenance &amp; Story</span><span class="acc-chevron">&#9662;</span></div>
+      <div class="acc-content"><div class="acc-content-inner"><div class="prov-text">${b.provenance}</div></div></div>
+    </div>` : '';
+
+  const venueBlock = b.venues.length ? `
+    <div class="acc-block" id="acc-venue">
+      <div class="acc-header"><span class="acc-title">Venue Fit</span><span class="acc-chevron">&#9662;</span></div>
+      <div class="acc-content"><div class="acc-content-inner"><div class="venue-chips-s3">${venuesHTML}</div></div></div>
+    </div>` : '';
+
+  return `
+    <div class="sheet-banner" style="--banner-bg:${theme.bannerBg || '#1A1210'};background:url(images/brands/banners/${brandSlug(name)}-banner.jpg) center/cover no-repeat, ${theme.bannerBg || '#1A1210'}">
+    </div>
+    <div class="sheet-logo-wrap">
+      <img class="sheet-logo" src="images/logos/${brandSlug(name)}-logo.png" alt="${name}" onerror="this.style.display='none'">
+    </div>
+    <div class="sheet-identity">
+      <div class="sheet-name">${name}</div>
+      <div class="sheet-producer">${b.producer}</div>
+      <div class="sheet-pills">
+        <span class="sheet-pill tier-${tc}">${b.tier}</span>
+        <span class="sheet-pill cat-pill">${catLabel(b.catId)}</span>
+      </div>
+    </div>
+    <div class="sheet-summary">${b.quick}</div>
+    <div class="sheet-specs">${b.specs.map(s => `<span class="spec-pill-s3">${s}</span>`).join('')}</div>
+
+    <div class="acc-block open" id="acc-selling">
+      <div class="acc-header"><span class="acc-title">Key Selling Points</span><span class="acc-chevron">&#9662;</span></div>
+      <div class="acc-content"><div class="acc-content-inner"><ul class="selling-points-s3">${b.sellingPoints.map(p => `<li>${p}</li>`).join('')}</ul></div></div>
+    </div>
+    ${provBlock}
+    ${venueBlock}
+    <div class="acc-block" id="acc-conv">
+      <div class="acc-header"><span class="acc-title">Conversation Starter</span><span class="acc-chevron">&#9662;</span></div>
+      <div class="acc-content"><div class="acc-content-inner"><div class="conv-q">"${b.conversation}"</div></div></div>
+    </div>
+    <div class="sheet-bottom-space"></div>
+  `;
+}
+
+function openSheet(brandName) {
+  const b = BRANDS[brandName];
+  if (!b) return;
+  const theme = CAT_THEMES[b.catId] || {};
+  const sheet = document.getElementById('brand-sheet');
+  sheet.style.setProperty('--sheet-bg', theme.sheetBg || '#100806');
+  sheet.style.setProperty('--sheet-border', theme.sheetBorder || 'rgba(196,151,58,0.25)');
+  document.getElementById('sheet-inner').innerHTML = buildSheetHTML(brandName, b);
+  document.getElementById('sheet-overlay').classList.add('open');
+  requestAnimationFrame(() => { sheet.classList.add('open'); });
+  sheet.scrollTop = 0;
+  sheetOpen = true;
+}
+
+function closeSheet() {
+  document.getElementById('brand-sheet').classList.remove('open');
+  document.getElementById('sheet-overlay').classList.remove('open');
+  sheetOpen = false;
+}
+
+function toggleAccordion(block) {
+  if (!block) return;
+  block.classList.toggle('open');
+}
+
+/* Swipe-down-to-dismiss on drag handle */
+(function() {
+  const handle = document.getElementById('sheet-handle');
+  const sheet  = document.getElementById('brand-sheet');
+  let startY = 0, curY = 0, dragging = false;
+
+  handle.addEventListener('touchstart', function(e) {
+    startY = e.touches[0].clientY;
+    dragging = true;
+    sheet.style.transition = 'none';
+  }, {passive:true});
+
+  handle.addEventListener('touchmove', function(e) {
+    if (!dragging) return;
+    curY = e.touches[0].clientY;
+    const delta = Math.max(0, curY - startY);
+    sheet.style.transform = `translateY(${delta}px)`;
+  }, {passive:true});
+
+  handle.addEventListener('touchend', function() {
+    if (!dragging) return;
+    dragging = false;
+    sheet.style.transition = '';
+    const delta = curY - startY;
+    requestAnimationFrame(() => {
+      sheet.style.transform = '';
+      if (delta > 80) { closeSheet(); }
+      curY = 0; startY = 0;
+    });
+  });
+})();
+
+/* ── EVENTS ── */
+document.addEventListener('click', function(e) {
+  if (e.target.closest('[data-action="back"]')) { goBack(); return; }
+  const bl = e.target.closest('[data-jump]');
+  if (bl) { jumpBack(bl.dataset.jump); return; }
+  const sc = e.target.closest('[data-nav="species"]');
+  if (sc) {
+    const sp = DATA.find(s => s.id === sc.dataset.id);
+    if (sp.direct) {
+      push('brands', { species: sp.id, cat: sp.directCat });
+    } else {
+      push('cats', { species: sp.id });
+    }
+    return;
+  }
+  const cc = e.target.closest('[data-nav="cat"]');
+  if (cc) { push('brands', { cat: cc.dataset.id }); return; }
+  const bc = e.target.closest('[data-nav="brand"]');
+  if (bc) { openSheet(bc.dataset.id); return; }
+  const accH = e.target.closest('.acc-header');
+  if (accH) { toggleAccordion(accH.closest('.acc-block')); return; }
+  if (e.target.id === 'sheet-overlay') { closeSheet(); return; }
+});
+
+/* ── INIT ── */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderHome);
+} else {
+  renderHome();
+}
+</script>
+</body>
+</html>
