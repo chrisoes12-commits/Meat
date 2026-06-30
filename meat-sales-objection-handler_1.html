@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moco Meats — Objection Handler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Moco Meats">
+<style>
+  :root {
+    --bg:          #0F0E0B;
+    --bg-card:     #1A1814;
+    --bg-raised:   #222018;
+    --gold:        #C4973A;
+    --gold-dim:    rgba(196,151,58,0.32);
+    --gold-pale:   rgba(196,151,58,0.08);
+    --text-1:      #F0EAE0;
+    --text-2:      #A09078;
+    --text-3:      #564A3C;
+    --border:      rgba(196,151,58,0.10);
+    --border-hi:   rgba(196,151,58,0.28);
+    --m1-rust:     #B2492F;
+    --m1-glow:     rgba(178,73,47,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text-1);
+    min-height: 100vh;
+    padding: 2rem 1rem 3rem;
+  }
+
+  .container { max-width: 680px; margin: 0 auto; }
+
+  /* Header */
+  .top-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    position: relative;
+  }
+  .top-header::before {
+    content: '';
+    position: absolute;
+    inset: -2rem -1rem 0;
+    background: radial-gradient(ellipse 60% 120px at 50% 0%, var(--m1-glow), transparent 70%);
+    pointer-events: none;
+  }
+  .top-header h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-1);
+    margin-bottom: 0.35rem;
+    position: relative;
+  }
+  .top-header p {
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.5;
+    font-weight: 400;
+    position: relative;
+  }
+
+  /* Meta bar + progress */
+  .meta-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+  }
+  .meta-bar span { font-size: 13px; color: var(--text-2); font-weight: 400; }
+  .score-display { font-size: 13px; font-weight: 500; color: var(--gold); }
+
+  .progress-bar {
+    height: 3px;
+    background: rgba(196,151,58,0.10);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+  }
+  .progress-fill {
+    height: 3px;
+    background: linear-gradient(90deg, var(--m1-rust), var(--gold));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* Card */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Customer row */
+  .customer-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(196,151,58,0.10);
+    border: 1px solid var(--border-hi);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+  .customer-name { font-size: 14px; font-weight: 500; color: var(--text-1); }
+  .customer-role { font-size: 12px; color: var(--text-2); margin-top: 2px; font-weight: 400; }
+
+  /* Objection quote */
+  .objection-text {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 16px;
+    color: var(--text-1);
+    line-height: 1.65;
+    font-style: italic;
+    border-left: 3px solid var(--gold);
+    padding-left: 1rem;
+    margin: 1rem 0;
+  }
+
+  .prompt { font-size: 13px; color: var(--text-2); margin: 0.75rem 0 0.5rem; font-weight: 400; }
+
+  /* Option buttons */
+  .options { display: flex; flex-direction: column; gap: 0.5rem; }
+  .option-btn {
+    background: var(--bg-raised);
+    border: 1px solid rgba(196,151,58,0.12);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    text-align: left;
+    font-size: 14px;
+    color: var(--text-1);
+    line-height: 1.5;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    transition: border-color 0.15s, background 0.15s;
+    width: 100%;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--border-hi);
+    background: rgba(196,151,58,0.06);
+  }
+  .option-btn.correct {
+    background: rgba(62,130,40,0.18);
+    border-color: rgba(90,170,55,0.50);
+    color: #A8DD78;
+  }
+  .option-btn.wrong {
+    background: rgba(160,50,40,0.20);
+    border-color: rgba(180,70,60,0.45);
+    color: #EE8878;
+  }
+  .option-btn.reveal {
+    background: rgba(62,130,40,0.10);
+    border-color: rgba(90,170,55,0.30);
+    color: #7AB85A;
+    opacity: 0.7;
+  }
+  .option-btn:disabled { cursor: default; }
+
+  /* Feedback box */
+  .feedback-box {
+    background: rgba(196,151,58,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+  .feedback-result {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0.5rem;
+  }
+  .feedback-result-text { font-size: 14px; font-weight: 500; }
+  .spin-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(196,151,58,0.16);
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+    margin-bottom: 0.6rem;
+  }
+  .feedback-text { font-size: 14px; color: var(--text-2); line-height: 1.6; font-weight: 400; }
+  .result-icon { font-size: 18px; }
+
+  /* Next button */
+  .next-btn {
+    margin-top: 1rem;
+    padding: 0.6rem 1.25rem;
+    border: 1px solid var(--border-hi);
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--gold);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    transition: background 0.15s;
+  }
+  .next-btn:hover { background: var(--gold-pale); }
+
+  /* Results card */
+  .results-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+  }
+  .results-score {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .results-score span { font-size: 26px; color: var(--text-2); }
+  .results-grade { font-size: 15px; color: var(--text-2); margin-top: 0.4rem; font-weight: 400; }
+
+  .results-breakdown { margin-top: 1.5rem; text-align: left; }
+  .breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .breakdown-row:last-child { border-bottom: none; }
+  .breakdown-pts { font-weight: 500; }
+
+  .retry-btn {
+    margin-top: 1.5rem;
+    padding: 0.65rem 1.75rem;
+    border: 1px solid var(--border-hi);
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--gold);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    transition: background 0.15s;
+  }
+  .retry-btn:hover { background: var(--gold-pale); }
+
+  .footer {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 12px;
+    color: var(--text-3);
+    font-weight: 400;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="top-header">
+    <h1>Objection Handler — Sales Training</h1>
+    <p>10 real-world objections from your hospitality customers. Pick your response and get instant SPIN coaching.</p>
+  </div>
+
+  <div class="meta-bar">
+    <span id="counter">Objection 1 of 10</span>
+    <span class="score-display" id="score-display">Score: 0</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:10%"></div></div>
+
+  <div id="main"></div>
+
+  <div class="footer">Built for meat sales training — SEQ &amp; Northern Rivers NSW</div>
+</div>
+
+<script>
+const objections = [
+  {
+    initials: "DM", name: "Dave M.", role: "Pub manager — Ipswich",
+    objection: "Look mate, we're pretty sorted with who we've got. Been using the same bloke for a few years now.",
+    options: [
+      { text: "A. That's fair enough — can I leave you some pricing anyway?", points: 0 },
+      { text: "B. That's great to hear. What's working really well for you with them?", points: 10 },
+      { text: "C. I get that, but we've got better prices and quality — worth giving us a shot.", points: 5 },
+    ],
+    correct: 1,
+    feedback: "Option B is a classic SPIN Situation move — you're not arguing, you're getting curious. Once Dave starts talking about what's working, you can gently probe for what isn't. Option C jumps straight to a product pitch before you've uncovered any pain. Option A is polite surrender.",
+    spin: "Situation question — stay curious, not pushy"
+  },
+  {
+    initials: "KL", name: "Karen L.", role: "Club manager — Gold Coast",
+    objection: "Your prices are higher than what we're paying now. We're a club, we have to watch every dollar.",
+    options: [
+      { text: "A. When you compare prices, are you factoring in trimming time and waste as well?", points: 10 },
+      { text: "B. We're actually very competitive — let me show you our price list.", points: 5 },
+      { text: "C. I understand, price is important. We can probably match what you're paying.", points: 0 },
+    ],
+    correct: 0,
+    feedback: "Option A is a great Problem/Implication combo — it gently challenges the comparison without being defensive. It opens a conversation about true cost vs invoice cost. Option B goes straight to the price list which keeps you in a price war. Option C is a margin-destroying capitulation before you've even established value.",
+    spin: "Problem question — challenge the comparison, not the customer"
+  },
+  {
+    initials: "BT", name: "Brad T.", role: "Operations manager — Brisbane function centre",
+    objection: "We do everything through Bidvest. One invoice, one rep, much easier for us to manage.",
+    options: [
+      { text: "A. Totally get it. Do you find the quality across all their protein categories is equally good?", points: 10 },
+      { text: "B. We can integrate into your invoicing system if that helps.", points: 5 },
+      { text: "C. That's really limiting you to average quality across the board though, isn't it?", points: 0 },
+    ],
+    correct: 0,
+    feedback: "Option A acknowledges their valid reason for the broadliner and then plants a Problem question that's hard to say yes to honestly. Quality inconsistency across a broadliner's range is a real, common issue. Option B focuses on admin before establishing value. Option C is confrontational — never tell a customer they're limiting themselves.",
+    spin: "Problem question — find the crack in the broadliner relationship"
+  },
+  {
+    initials: "MH", name: "Marcus H.", role: "Restaurant owner — Toowoomba",
+    objection: "Our customers don't pay for Wagyu. We're not that kind of restaurant.",
+    options: [
+      { text: "A. Fair enough — we do standard beef too, let me tell you about our Angus range.", points: 5 },
+      { text: "B. What's your current steak offering on the menu?", points: 10 },
+      { text: "C. Wagyu is becoming mainstream — even pub steakhouses are running it now.", points: 0 },
+    ],
+    correct: 1,
+    feedback: "Option B is a Situation question that opens the door without arguing. Once Marcus describes his menu, you can explore whether there's room for a two-tier offering or a seasonal premium night — without you having to push it. Option A pivots too quickly to Angus before understanding his menu. Option C is a pressure tactic disguised as market education.",
+    spin: "Situation question — understand before you suggest"
+  },
+  {
+    initials: "SB", name: "Sarah B.", role: "Cafe owner — Byron Bay",
+    objection: "Your minimum order is way too big for a place our size. We'd never get through it.",
+    options: [
+      { text: "A. We can look at a smaller minimum for you — what volume are you doing weekly?", points: 10 },
+      { text: "B. Our minimum is there for a reason but we could maybe split a delivery with another account.", points: 5 },
+      { text: "C. Most of our cafe customers manage the minimum fine — it usually works out.", points: 0 },
+    ],
+    correct: 0,
+    feedback: "Option A asks a Situation question before jumping to solutions — you need to know her actual volume before you promise anything. Option B offers a creative workaround but skips understanding what she actually needs. Option C dismisses her concern by comparing her to other customers, which feels invalidating.",
+    spin: "Situation question — understand volume before offering solutions"
+  },
+  {
+    initials: "JP", name: "James P.", role: "Restaurant owner — Noosa",
+    objection: "We had a supplier let us down badly last year. Delivery didn't show up before a Saturday service. Never again.",
+    options: [
+      { text: "A. I completely understand. What happened when the delivery didn't show — how did you handle service that night?", points: 10 },
+      { text: "B. That would never happen with us — we have a very reliable delivery system.", points: 5 },
+      { text: "C. That's a nightmare. Which supplier was it?", points: 0 },
+    ],
+    correct: 0,
+    feedback: "Option A is a brilliant Implication move — you're not dismissing his experience, you're deepening it. When James relives the chaos of that Saturday night, the pain becomes real and current, not historical. Option B is a reassurance promise he has no reason to believe yet. Option C is just gossip fishing — doesn't build trust or uncover anything useful.",
+    spin: "Implication question — let him feel the pain again"
+  },
+  {
+    initials: "TN", name: "Tony N.", role: "Pub bistro — Logan",
+    objection: "Look, I'd love to help but you need to talk to Mick. He's the head chef, he makes all the food decisions.",
+    options: [
+      { text: "A. No worries — can I get Mick's number and call him directly?", points: 5 },
+      { text: "B. Of course. Before I do, what does Mick tend to care most about when it comes to his suppliers?", points: 10 },
+      { text: "C. Sure, but as manager you'd have final say on spend, right?", points: 0 },
+    ],
+    correct: 1,
+    feedback: "Option B is smart — Tony knows Mick better than you do, and getting intel before you call is gold. What does Mick care about? Quality? Consistency? Not being surprised? That's your roadmap. Option A is fine but wastes a warm contact opportunity. Option C is politically clumsy — you're essentially undermining Tony's referral before you've even met Mick.",
+    spin: "Situation question — gather intel before the next call"
+  },
+  {
+    initials: "AL", name: "Amy L.", role: "Venue manager — Sunshine Coast",
+    objection: "We're locked into a contract with our current supplier until the end of the year.",
+    options: [
+      { text: "A. No problem at all. When the contract ends, what would make you consider switching?", points: 10 },
+      { text: "B. There might be ways around a contract if the quality isn't there — have you looked at the terms?", points: 0 },
+      { text: "C. That's fine — can I send you some information so you've got it when the time comes?", points: 5 },
+    ],
+    correct: 0,
+    feedback: "Option A turns a dead end into a discovery call — you now know what she values and what her current supplier does or doesn't deliver. You've positioned yourself for a call in October or November without being pushy. Option C is the polite brush-off (she'll forget your brochure). Option B is essentially suggesting she breach a contract, which is a relationship-destroying move.",
+    spin: "Need-Payoff question — plant a seed for the future"
+  },
+  {
+    initials: "RC", name: "Rob C.", role: "Cafe owner — Ballina",
+    objection: "The problem with meat suppliers is the delivery times. We open at 7am and start prepping at 6. I need product here before then, not rocking up at lunchtime.",
+    options: [
+      { text: "A. We deliver 6 days a week and 90% of our deliveries are done by 1pm — most customers find that works fine.", points: 0 },
+      { text: "B. We can't guarantee a specific time unfortunately, it depends on the run that day.", points: 5 },
+      { text: "C. We do have an early delivery request option — routing varies by area but let me find out what we can do for Ballina specifically and come back to you.", points: 10 },
+    ],
+    correct: 2,
+    feedback: "Option C is the winner — you're not over-promising, but you're not shutting the door either. You've acknowledged the request is possible, been honest that it depends on routing, and committed to a specific follow-up. That's a service-first answer that builds trust. Option B is honest but passive — no attempt to solve it. Option A dismisses his concern entirely by telling him other customers are fine with 1pm, which is irrelevant to a 6am prep kitchen.",
+    spin: "Need-Payoff — show service mindset, don't over-promise"
+  },
+  {
+    initials: "GF", name: "Glen F.", role: "Pub manager — Toowoomba",
+    objection: "We ran a Wagyu special once. Didn't sell. Took it off after three weeks.",
+    options: [
+      { text: "A. That's interesting — what marble score were you running and what was the price point on the menu?", points: 10 },
+      { text: "B. Wagyu can be tricky to sell — it's all about how you market it.", points: 5 },
+      { text: "C. A lot of venues struggle with Wagyu the first time. It takes a few tries to get right.", points: 0 },
+    ],
+    correct: 0,
+    feedback: "Option A is a great diagnostic Situation question — the reason a Wagyu special fails is almost always one of three things: wrong marble score for the price point, wrong price point for the customer base, or wrong positioning on the menu. You need to know before you can help. Option B is generic advice that doesn't earn trust. Option C tells him he failed and implies he should try again — not a great sales move.",
+    spin: "Situation question — diagnose before you prescribe"
+  }
+];
+
+let order = objections.map((_, i) => i);
+let current = 0, score = 0, scores = [], answered = false;
+
+function render() {
+  const main = document.getElementById('main');
+  if (current >= order.length) { renderResults(main); return; }
+  const q = objections[order[current]];
+  document.getElementById('counter').textContent = `Objection ${current + 1} of ${order.length}`;
+  document.getElementById('score-display').textContent = `Score: ${score}`;
+  document.getElementById('progress').style.width = `${((current + 1) / order.length) * 100}%`;
+
+  main.innerHTML = `
+    <div class="card">
+      <div class="customer-row">
+        <div class="avatar">${q.initials}</div>
+        <div>
+          <div class="customer-name">${q.name}</div>
+          <div class="customer-role">${q.role}</div>
+        </div>
+      </div>
+      <div class="objection-text">"${q.objection}"</div>
+      <p class="prompt">What do you say next?</p>
+      <div class="options" id="opts">
+        ${q.options.map((o, i) => `<button class="option-btn" onclick="pick(${i})">${o.text}</button>`).join('')}
+      </div>
+      <div id="feedback-area"></div>
+    </div>
+  `;
+  answered = false;
+}
+
+function pick(idx) {
+  if (answered) return;
+  answered = true;
+  const q = objections[order[current]];
+  const pts = q.options[idx].points;
+  score += pts;
+  scores.push({ qIdx: order[current], pts });
+  document.getElementById('score-display').textContent = `Score: ${score}`;
+
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === idx && idx === q.correct) btn.classList.add('correct');
+    else if (i === idx) btn.classList.add('wrong');
+    else if (i === q.correct) btn.classList.add('reveal');
+  });
+
+  const icon = pts === 10 ? '✅' : pts === 5 ? '⚠️' : '❌';
+  const resultText = pts === 10 ? 'Best answer' : pts === 5 ? 'Acceptable' : 'Poor choice';
+  const resultColour = pts === 10 ? '#A8DD78' : pts === 5 ? '#D4A05A' : '#EE8878';
+
+  document.getElementById('feedback-area').innerHTML = `
+    <div class="feedback-box">
+      <div class="feedback-result">
+        <span class="result-icon">${icon}</span>
+        <span class="feedback-result-text" style="color:${resultColour};">${resultText} (+${pts} pts)</span>
+      </div>
+      <div class="spin-tag">${q.spin}</div>
+      <p class="feedback-text">${q.feedback}</p>
+    </div>
+    <button class="next-btn" onclick="nextQ()">${current < order.length - 1 ? 'Next objection →' : 'See results →'}</button>
+  `;
+}
+
+function nextQ() { current++; render(); }
+
+function renderResults(main) {
+  document.getElementById('counter').textContent = 'Complete';
+  document.getElementById('progress').style.width = '100%';
+  const max = order.length * 10;
+  const pct = Math.round((score / max) * 100);
+  const grade = pct >= 90 ? 'Outstanding — SPIN master' : pct >= 70 ? 'Strong — a few edges to sharpen' : pct >= 50 ? 'Getting there — focus on Implication questions' : 'Keep practising — revisit the SPIN framework';
+
+  const breakdownHtml = scores.map(({ qIdx, pts }) => {
+    const q = objections[qIdx];
+    const col = pts === 10 ? '#A8DD78' : pts === 5 ? '#D4A05A' : '#EE8878';
+    return `
+      <div class="breakdown-row">
+        <span>${q.name} — ${q.role.split('—')[0].trim()}</span>
+        <span class="breakdown-pts" style="color:${col};">${pts === 10 ? '+10' : pts === 5 ? '+5' : '+0'}</span>
+      </div>`;
+  }).join('');
+
+  main.innerHTML = `
+    <div class="results-card">
+      <div class="results-score">${score}<span>/${max}</span></div>
+      <div class="results-grade">${pct}% — ${grade}</div>
+      <div class="results-breakdown">${breakdownHtml}</div>
+      <button class="retry-btn" onclick="restart()">↺ Try again</button>
+    </div>
+  `;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function restart() {
+  order = shuffle(objections.map((_, i) => i));
+  current = 0; score = 0; scores = []; answered = false;
+  document.getElementById('score-display').textContent = 'Score: 0';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
